@@ -104,6 +104,16 @@
                     <i class="ri-database-2-line" />
                 </a>
                 <a
+                    href="/ai-query"
+                    class="menu-item"
+                    aria-label="AI Query"
+                    use:link
+                    use:active={{ path: "/ai-query/?.*", className: "current-route" }}
+                    use:tooltip={{ text: "AI Query", position: "right" }}
+                >
+                    <i class="ri-robot-line" />
+                </a>
+                <a
                     href="/logs"
                     class="menu-item"
                     aria-label="Logs"

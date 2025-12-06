@@ -9,6 +9,7 @@ import PageImportCollections from "@/components/settings/PageImportCollections.s
 import PageMail from "@/components/settings/PageMail.svelte";
 import PageStorage from "@/components/settings/PageStorage.svelte";
 import PageSuperuserLogin from "@/components/superusers/PageSuperuserLogin.svelte";
+import AIQueryPanel from "@/components/ai/AIQueryPanel.svelte";
 import ApiClient from "@/utils/ApiClient";
 import { isTokenExpired } from "pocketbase";
 import { wrap } from "svelte-spa-router/wrap";
@@ -48,6 +49,12 @@ const routes = {
 
     "/logs": wrap({
         component: PageLogs,
+        conditions: [(_) => ApiClient.authStore.isValid],
+        userData: { showAppSidebar: true },
+    }),
+
+    "/ai-query": wrap({
+        component: AIQueryPanel,
         conditions: [(_) => ApiClient.authStore.isValid],
         userData: { showAppSidebar: true },
     }),
