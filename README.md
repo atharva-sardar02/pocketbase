@@ -17,6 +17,8 @@
 - convenient **Admin dashboard UI**
 - and simple **REST-ish API**
 
+**This fork includes an AI-powered natural language query assistant** that enables users to query database collections using plain English instead of learning PocketBase's filter syntax. See [docs/AI_QUERY_FEATURE.md](docs/AI_QUERY_FEATURE.md) for more details.
+
 **For documentation and examples, please visit https://pocketbase.io/docs.**
 
 > [!WARNING]

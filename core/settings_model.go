@@ -128,6 +128,7 @@ type settings struct {
 	TrustedProxy TrustedProxyConfig `form:"trustedProxy" json:"trustedProxy"`
 	Batch        BatchConfig        `form:"batch" json:"batch"`
 	Logs         LogsConfig         `form:"logs" json:"logs"`
+	AI           AISettings        `form:"ai" json:"ai"`
 }
 
 // Settings defines the PocketBase app settings.
@@ -177,6 +178,14 @@ func newDefaultSettings() *Settings {
 					{Label: "/api/batch", MaxRequests: 3, Duration: 1},
 					{Label: "/api/", MaxRequests: 300, Duration: 10},
 				},
+			},
+			AI: AISettings{
+				Enabled:     false,
+				Provider:    "openai",
+				BaseURL:     "https://api.openai.com/v1",
+				APIKey:      "",
+				Model:       "gpt-4o-mini",
+				Temperature: 0.1,
 			},
 		},
 	}
@@ -287,6 +296,7 @@ func (s *Settings) PostValidate(ctx context.Context, app App) error {
 		validation.Field(&s.Batch),
 		validation.Field(&s.RateLimits),
 		validation.Field(&s.TrustedProxy),
+		validation.Field(&s.AI),
 	)
 }
 
