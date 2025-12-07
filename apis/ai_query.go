@@ -33,6 +33,10 @@ type AIQueryResponse struct {
 func bindAIQueryApi(app core.App, rg *router.RouterGroup[*core.RequestEvent]) {
 	subGroup := rg.Group("/ai/query").Bind(RequireAuth())
 	subGroup.POST("", aiQuery)
+	// Also register GET for debugging (will return method error)
+	subGroup.GET("", func(e *core.RequestEvent) error {
+		return e.BadRequestError("This endpoint only accepts POST requests.", nil)
+	})
 }
 
 func aiQuery(e *core.RequestEvent) error {
@@ -88,12 +92,26 @@ func aiQuery(e *core.RequestEvent) error {
 	systemPrompt := ai.BuildSystemPrompt(schema)
 	userPrompt := ai.BuildUserPrompt(req.Query)
 
+	// DEBUG: Log prompts
+	e.App.Logger().Debug("AI Query Debug",
+		"schema", schema,
+		"systemPrompt_length", len(systemPrompt),
+		"userPrompt", userPrompt,
+	)
+
 	// Create OpenAI client
 	client := ai.NewOpenAIClient(settings.AI)
 
 	// Call LLM
 	ctx := context.Background()
 	filter, err := client.SendCompletion(ctx, systemPrompt, userPrompt)
+	
+	// DEBUG: Log response
+	e.App.Logger().Debug("AI Query Response",
+		"filter", filter,
+		"error", err,
+	)
+	
 	if err != nil {
 		return e.BadRequestError("Failed to generate filter from query.", err)
 	}

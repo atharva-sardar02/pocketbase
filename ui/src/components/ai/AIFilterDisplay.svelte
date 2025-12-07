@@ -1,9 +1,13 @@
 <script>
-    import { link } from "svelte-spa-router";
+    import { push } from "svelte-spa-router";
     import { aiFilter, aiCollection } from "@/stores/ai";
+    import { collections } from "@/stores/collections";
     import CodeBlock from "@/components/base/CodeBlock.svelte";
     import CopyIcon from "@/components/base/CopyIcon.svelte";
     import { addSuccessToast } from "@/stores/toasts";
+
+    // Get collection ID from name
+    $: collectionId = $collections?.find(c => c.name === $aiCollection)?.id || $aiCollection;
 
     function copyFilter() {
         if ($aiFilter) {
@@ -13,10 +17,12 @@
     }
 
     function applyFilter() {
-        if ($aiFilter && $aiCollection) {
-            // Navigate to collection with filter applied
+        if ($aiFilter && collectionId) {
+            // Open collection with filter in new tab to avoid state conflicts
+            // The PageRecords component resets filter when collection changes in SPA navigation
             const filterParam = encodeURIComponent($aiFilter);
-            window.location.href = `/collections?collection=${$aiCollection}&filter=${filterParam}`;
+            const url = `/_/#/collections?collection=${collectionId}&filter=${filterParam}`;
+            window.open(url, '_blank');
         }
     }
 </script>

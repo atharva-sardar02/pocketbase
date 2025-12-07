@@ -18,3 +18,32 @@ CHANGELOG.html
 CHANGELOG_16_22.html
 CHANGELOG_8_15.html
 LICENSE.html
+
+# Build artifacts (additional safety)
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Database files (contain encrypted API keys and user data)
+pb_data/
+*.db
+*.db-shm
+*.db-wal
+
+# Environment files with secrets (if any)
+.env.local
+.env.*.local
+*.secret
+*secrets*
+
+# Log files
+*.log
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Cursor IDE generated assets (screenshots, etc.)
+/assets/

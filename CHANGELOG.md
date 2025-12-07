@@ -1,3 +1,16 @@
+## AI Query Feature (Fork Addition)
+
+- Added **AI Query Assistant** - Natural language query interface for PocketBase collections
+  - Natural language query interface in Admin UI sidebar
+  - Schema-aware prompting that automatically understands collection field names and types
+  - Filter expression display with copy functionality
+  - REST API endpoint (`POST /api/ai/query`) for programmatic access
+  - Multiple LLM provider support (OpenAI, Ollama, Anthropic, Custom)
+  - AI Settings page in Admin UI for configuration
+  - Filter validation to ensure generated expressions match collection schema
+  - Respects existing collection API rules and authentication
+  - See [docs/AI_QUERY_FEATURE.md](docs/AI_QUERY_FEATURE.md) for full documentation
+
 ## v0.34.2
 
 - Bumped JS SDK to v0.26.5 to fix Safari AbortError detection introduced with the previous release ([#7369](https://github.com/pocketbase/pocketbase/issues/7369)).

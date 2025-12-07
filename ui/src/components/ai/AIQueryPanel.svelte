@@ -13,6 +13,7 @@
         aiCollection,
         resetAIState,
     } from "@/stores/ai";
+    import { loadCollections } from "@/stores/collections";
     import ApiClient from "@/utils/ApiClient";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import PageSidebar from "@/components/base/PageSidebar.svelte";
@@ -27,6 +28,8 @@
     onMount(() => {
         // Reset state when component mounts
         resetAIState();
+        // Load collections for the dropdown
+        loadCollections();
     });
 
     async function handleQuerySubmit(event) {
@@ -52,7 +55,11 @@
             };
 
             // Make API call to /api/ai/query
-            const url = `${ApiClient.baseURL}/api/ai/query`;
+            // Ensure proper URL construction (avoid double slashes)
+            const baseUrl = ApiClient.baseURL.endsWith('/') 
+                ? ApiClient.baseURL.slice(0, -1) 
+                : ApiClient.baseURL;
+            const url = `${baseUrl}/api/ai/query`;
             const response = await fetch(url, {
                 method: "POST",
                 body: JSON.stringify(requestBody),

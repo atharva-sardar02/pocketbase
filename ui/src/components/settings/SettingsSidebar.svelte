@@ -48,6 +48,15 @@
             <i class="ri-time-line" aria-hidden="true"></i>
             <span class="txt">Crons</span>
         </a>
+        <a
+            href="/settings/ai"
+            class="sidebar-list-item"
+            use:active={{ path: "/settings/ai/?.*" }}
+            use:link
+        >
+            <i class="ri-robot-line" aria-hidden="true"></i>
+            <span class="txt">AI Query</span>
+        </a>
 
         {#if !$hideControls}
             <div class="sidebar-title">

@@ -17,7 +17,26 @@
 - convenient **Admin dashboard UI**
 - and simple **REST-ish API**
 
-**This fork includes an AI-powered natural language query assistant** that enables users to query database collections using plain English instead of learning PocketBase's filter syntax. See [docs/AI_QUERY_FEATURE.md](docs/AI_QUERY_FEATURE.md) for more details.
+## 🤖 AI Query Assistant
+
+**This fork includes an AI-powered natural language query assistant** that enables users to query database collections using plain English instead of learning PocketBase's filter syntax.
+
+### Features
+
+- **Natural Language Queries** - Ask questions in plain English like "show me all pending orders from last week"
+- **Schema-Aware** - Automatically understands your collection's field names and types
+- **Multiple LLM Providers** - Support for OpenAI, Ollama (local), Anthropic, and custom providers
+- **Admin UI Integration** - Built-in sidebar panel in the PocketBase Admin dashboard
+- **REST API** - Programmatic access via `/api/ai/query` endpoint
+- **Security First** - Respects existing collection API rules and authentication
+
+### Quick Start
+
+1. **Enable AI Query** in Settings → AI Query
+2. **Configure your LLM provider** (OpenAI, Ollama, Anthropic, or custom)
+3. **Start querying** using natural language in the Admin UI or via API
+
+For detailed documentation, setup instructions, and API reference, see [docs/AI_QUERY_FEATURE.md](docs/AI_QUERY_FEATURE.md).
 
 **For documentation and examples, please visit https://pocketbase.io/docs.**
 

@@ -11,17 +11,14 @@
     let queryText = "";
     let selectedCollection = "";
 
-    $: if ($collections && $collections.length > 0 && !selectedCollection) {
-        // Default to first non-system collection
-        const firstCollection = $collections.find((c) => !c.system) || $collections[0];
-        selectedCollection = firstCollection?.name || "";
+    $: if (collectionNames && collectionNames.length > 0 && !selectedCollection) {
+        // Default to first collection
+        selectedCollection = collectionNames[0] || "";
     }
 
-    $: collectionOptions = $collections
-        ? $collections.map((c) => ({
-              value: c.name,
-              label: c.name,
-          }))
+    // Extract collection names for the Select component
+    $: collectionNames = $collections
+        ? $collections.filter((c) => !c.system).map((c) => c.name)
         : [];
 
     function handleSubmit() {
@@ -47,12 +44,12 @@
 <div class="ai-query-input">
     <div class="form-field m-b-sm">
         <label class="form-label">Collection</label>
-        {#if $collections && $collections.length > 0}
+        {#if collectionNames && collectionNames.length > 0}
             <Select
-                options={collectionOptions}
-                value={selectedCollection}
+                items={collectionNames}
+                selected={selectedCollection}
                 on:change={(e) => {
-                    selectedCollection = e.detail.value;
+                    selectedCollection = e.detail.selected;
                     aiCollection.set(selectedCollection);
                 }}
                 disabled={$aiLoading}
@@ -73,9 +70,8 @@
     <div class="form-field m-b-sm">
         <label class="form-label">Query</label>
         <AutoExpandTextarea
-            value={queryText}
+            bind:value={queryText}
             placeholder="Enter your query in natural language... (e.g., 'show me active orders over $100')"
-            on:input={(e) => (queryText = e.target.value)}
             on:keydown={handleKeydown}
             disabled={$aiLoading}
             rows="3"

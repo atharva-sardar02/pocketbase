@@ -1,7 +1,42 @@
 <script>
     import { link } from "svelte-spa-router";
     import { aiResults, aiTotalItems, aiCollection, aiPage, aiPerPage } from "@/stores/ai";
+    import { collections } from "@/stores/collections";
     import CommonHelper from "@/utils/CommonHelper";
+
+    // System/metadata fields to exclude from display
+    const excludedFields = new Set([
+        "id", "created", "updated", "collectionId", "collectionName", 
+        "expand", "@collectionId", "@collectionName"
+    ]);
+
+    // Get collection ID from name
+    $: collectionId = $collections?.find(c => c.name === $aiCollection)?.id || $aiCollection;
+
+    // Get displayable fields from a record
+    function getDisplayFields(record) {
+        return Object.entries(record)
+            .filter(([key, value]) => {
+                // Skip excluded fields
+                if (excludedFields.has(key)) return false;
+                // Skip null/undefined values
+                if (value === null || value === undefined) return false;
+                // Skip empty strings
+                if (value === "") return false;
+                return true;
+            })
+            .slice(0, 6); // Show up to 6 fields
+    }
+
+    // Format a value for display
+    function formatValue(value) {
+        if (value === true) return "Yes";
+        if (value === false) return "No";
+        if (typeof value === "object") {
+            return JSON.stringify(value);
+        }
+        return String(value);
+    }
 
     $: hasResults = $aiResults && $aiResults.length > 0;
     $: startIndex = ($aiPage - 1) * $aiPerPage + 1;
@@ -19,9 +54,9 @@
                     </span>
                 {/if}
             </h5>
-            {#if $aiCollection}
+            {#if collectionId}
                 <a
-                    href="/collections?collection={$aiCollection}"
+                    href="/collections?collection={collectionId}"
                     class="btn btn-sm btn-transparent"
                     use:link
                 >
@@ -37,12 +72,10 @@
                         <strong>ID:</strong> {record.id}
                     </div>
                     <div class="result-fields">
-                        {#each Object.entries(record).slice(0, 5) as [key, value]}
-                            {#if key !== "id" && value !== null && value !== undefined}
-                                <div class="result-field">
-                                    <strong>{key}:</strong> {CommonHelper.displayValue(value)}
-                                </div>
-                            {/if}
+                        {#each getDisplayFields(record) as [key, value]}
+                            <div class="result-field">
+                                <strong>{key}:</strong> {formatValue(value)}
+                            </div>
                         {/each}
                     </div>
                 </div>
