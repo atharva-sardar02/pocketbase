@@ -1,4 +1,30 @@
-## AI Query Feature (Fork Addition)
+## AI Query Feature V2 (Fork Addition)
+
+### V2: SQL Terminal & Dual Output Mode
+
+- Added **SQL Terminal** - Full SQL interface for PocketBase
+  - Direct SQL query execution with schema-aware editor
+  - AI-powered SQL generation from natural language
+  - Schema browser with click-to-insert functionality
+  - Query history with local storage persistence
+  - Dynamic results table with sorting, CSV/JSON export
+  - DDL operations (CREATE/ALTER/DROP) that create real PocketBase collections
+  - Safety features: confirmation for destructive ops, system table protection
+  - REST API endpoints:
+    - `POST /api/sql/execute` - Execute raw SQL
+    - `POST /api/sql/ai` - AI generates and optionally executes SQL
+    - `GET /api/sql/schema` - Get database schema
+  - See [docs/SQL_TERMINAL_FEATURE.md](docs/SQL_TERMINAL_FEATURE.md) for full documentation
+
+- Added **Dual Output Mode** to AI Query
+  - Get both PocketBase filter AND SQL for any natural language query
+  - Editable code blocks with execute button
+  - Tab interface to switch between Filter and SQL views
+  - Auto-detection of queries requiring SQL (JOINs, aggregations)
+  - Multi-collection schema extraction for complex queries
+  - Updated API: `mode: "dual"` returns both filter and SQL
+
+### V1: AI Query Assistant (Original)
 
 - Added **AI Query Assistant** - Natural language query interface for PocketBase collections
   - Natural language query interface in Admin UI sidebar

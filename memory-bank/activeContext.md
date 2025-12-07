@@ -2,434 +2,123 @@
 
 ## Current Work Focus
 
-**Phase:** All PRs Complete - End-to-End Testing Complete  
-**Status:** ✅ Feature Fully Tested & Working (100%)  
-**Next Step:** Feature ready for production use; consider relation queries or advanced features
+**Phase:** V2 Complete + All Enhancements  
+**Status:** V1 ✅ Complete, V2 ✅ Complete + Enhanced + Ready to Merge  
+**Branch:** `feat/v2-multi-table-sql`  
+**Next Step:** Commit all changes and merge to main/master
 
-## Recent Changes
+## Session Summary - All Features Complete
 
-### Memory Bank Initialization (Session 1)
-- ✅ Created memory bank directory structure
-- ✅ Created all core memory bank files:
-  - `projectbrief.md` - Foundation document
-  - `productContext.md` - User experience and personas
-  - `systemPatterns.md` - Architecture and design patterns
-  - `techContext.md` - Technology stack and constraints
-  - `activeContext.md` - This file (current work tracking)
-  - `progress.md` - Implementation status tracking
+### New Features Added This Session
+1. ✅ **Multi-Statement SQL Execution** - Run multiple SQL commands separated by `;`
+2. ✅ **Multi-Results Display** - Each statement shows its own results table
+3. ✅ **Generated SQL Wrapping** - Long SQL queries wrap nicely
+4. ✅ **Multi-Row INSERT Support** - INSERT with multiple VALUES rows now works
+5. ✅ **"See in Collection" Button** - Navigate to collection with filter applied (SPA navigation)
 
-### Project Documentation
-- ✅ PRD document available: `PocketBase_AI_Query_Assistant_PRD.md`
-- ✅ Task list available: `PocketBase_AI_Query_TaskList.md`
-- ✅ 9 PRs planned with detailed task breakdowns
+### Bug Fixes Applied This Session
+1. ✅ AI Query Results Clearing - Old results clear when new AI query returns empty
+2. ✅ Table Header Sticky Scroll - Column headers stay fixed while scrolling
+3. ✅ Generated SQL Box Overflow - SQL no longer gets cut off
+4. ✅ Multi-Row INSERT Parsing - Parser now handles `INSERT ... VALUES (...), (...), (...)`
 
-### PR #1 Implementation (Session 2 - December 5, 2025) ✅ COMPLETE
-- ✅ **Task 1.1:** Forked PocketBase repository to GitHub (https://github.com/atharva-sardar02/pocketbase)
-- ✅ **Task 1.2:** Cloned repository locally and moved contents to root directory
-- ✅ **Task 1.3:** Verified Go environment (go1.25.5 - meets requirement ≥ 1.21)
-- ✅ **Task 1.4:** Verified Node.js environment (v22.12.0 - meets requirement ≥ 18)
-- ✅ **Task 1.5:** Initial build successful
-  - ✅ UI build completed (`npm run build` in `ui/`)
-  - ✅ Go binary built (`base.exe` created in `examples/base/`)
-- ✅ **Task 1.6:** Created feature branch `feat/ai-query-setup`
-- ✅ **Task 1.7:** Created empty directory structure:
-  - `services/ai/`
-  - `ui/src/components/ai/`
-  - `tests/integration/`
-  - `docs/`
-- ✅ **Task 1.8:** Added `.gitkeep` files to empty directories
-- ✅ **Task 1.9:** Updated `README.md` with AI Query feature mention
-- ✅ **Task 1.10:** Created `docs/AI_QUERY_FEATURE.md` with initial structure
+## Key Implementation Details
 
-## Next Steps
+### Multi-Statement SQL (`services/sql/executor.go`)
+```go
+SplitStatements(sql string) []string           // Splits SQL by ; (handles strings)
+ExecuteMultiple(ctx, sql) (*MultiExecutionResult, error)  // Runs all statements
+```
 
-### Immediate Next Steps (PR #9)
-1. **Complete `docs/AI_QUERY_FEATURE.md`** - Feature documentation
-2. **Update main `README.md`** - Add AI Query to features list
-3. **Create `CHANGELOG.md` entry** - Add release notes for AI Query feature
-4. **Final code review and cleanup** - Remove debug logging, fix TODOs
-5. **Run full test suite** - Ensure all tests pass
-6. **Build final release binary** - Verify production build
-7. **Record demo video** - 5 minute feature demonstration
+### Multi-Row INSERT (`services/sql/parser.go`)
+```go
+MultiValues []map[string]any  // New field in SQLStatement struct
+parseMultipleValueRows()      // Parses (v1,v2), (v3,v4) rows
+```
 
-### Completed Work
-- ✅ **PR #8:** Admin UI — AI Settings Page (Complete)
+### "See in Collection" (`ui/src/components/ai/`)
+- `AIFilterDisplay.svelte` - Uses `push()` for SPA navigation
+- `AIQueryPanel.svelte` - Added button below filter code block
+- Navigates to `/collections?collection=ID&filter=ENCODED_FILTER`
 
-## Active Decisions and Considerations
+## V2 Implementation Status - COMPLETE
 
-### Decisions Made
-1. ✅ **LLM Provider:** OpenAI with `gpt-4o-mini` as default
-2. ✅ **UI Placement:** Sidebar panel (dedicated AI Query section)
-3. ✅ **Settings Storage:** Existing `_params` table
-4. ✅ **API Key:** Required, encrypted at rest
-5. ✅ **LLM Library:** Raw `net/http` calls (no external dependencies)
-6. ✅ **Filter Execution:** Both (filter + results via `execute` parameter)
+### All PRs + Enhancements ✅
+- ✅ PR #10: Multi-Collection Schema Extraction
+- ✅ PR #11: Dual Output Backend (Filter + SQL)
+- ✅ PR #12: Editable Query UI with Tabs
+- ✅ PR #13: SQL Parser & Type Mapper
+- ✅ PR #14: SQL Executor (PocketBase API Integration)
+- ✅ PR #15: SQL Terminal API Endpoints
+- ✅ PR #16: SQL Terminal UI
+- ✅ PR #17: V2 Documentation
+- ✅ Enhancement: Multi-Statement SQL Execution
+- ✅ Enhancement: Multi-Row INSERT Support
+- ✅ Enhancement: "See in Collection" SPA Navigation
 
-### Open Questions (From PRD)
-1. **Rate limiting?** Should we add basic rate limiting (e.g., 10 queries/minute)?
-2. **Telemetry?** Log AI queries to PocketBase logs for debugging? Privacy implications?
-3. **Fallback behavior?** If OpenAI API is unavailable, show error or hide AI feature entirely?
-4. **Cost warning?** Show estimated cost per query in UI? (e.g., "~$0.0002 per query")
+## All Bug Fixes Summary
 
-### Technical Considerations
-- **Go Learning Curve:** Budget 1-2 days for familiarization
-- **PocketBase Integration:** Study existing code patterns before modifying
-- **Build Process:** Create automation script for UI rebuild workflow
-- **Testing Strategy:** Focus on unit tests first, then integration tests
+| # | Issue | File | Fix |
+|---|-------|------|-----|
+| 1 | CREATE TABLE multi-line parsing | `parser.go` | `(?s)` regex flag |
+| 2 | System collection SELECT blocked | `executor.go` | Allow SELECT on `_` tables |
+| 3 | AI results nested format | `SQLTerminal.svelte` | `data.result \|\| data` |
+| 4 | First column cut off | `ResultsTable.svelte` | Fixed overflow/scroll |
+| 5 | Generated SQL truncated | `SQLTerminal.svelte` | `white-space: pre-wrap` |
+| 6 | AI results not clearing | `SQLTerminal.svelte` | Clear stores on new query |
+| 7 | Multi-table sticky headers | `SQLTerminal.svelte` | `border-collapse: separate` |
+| 8 | Multi-row INSERT failing | `parser.go`, `executor.go` | Added MultiValues support |
 
-## Current Blockers
+## Files Modified This Session
 
-**None** - PR #1 is complete. Development environment is fully set up and verified.
+### Backend
+- `services/sql/parser.go` - Multi-row INSERT parsing
+- `services/sql/executor.go` - Multi-statement + multi-row INSERT execution
+- `apis/sql_terminal.go` - Multi-statement API response
 
-## Active Files
+### Frontend
+- `ui/src/pages/SQLTerminal.svelte` - Multi-results UI, CSS fixes
+- `ui/src/stores/sql.js` - Multi-statement stores
+- `ui/src/components/ai/AIFilterDisplay.svelte` - SPA "See in Collection"
+- `ui/src/components/ai/AIQueryPanel.svelte` - "See in Collection" button
 
-### Documentation Files
-- `PocketBase_AI_Query_Assistant_PRD.md` - Product Requirements Document
-- `PocketBase_AI_Query_TaskList.md` - Detailed task breakdown (9 PRs)
+## Git Commands for Next Session
 
-### Memory Bank Files
-- `memory-bank/projectbrief.md` - Project foundation
-- `memory-bank/productContext.md` - User experience context
-- `memory-bank/systemPatterns.md` - Architecture patterns
-- `memory-bank/techContext.md` - Technical details
-- `memory-bank/activeContext.md` - This file
-- `memory-bank/progress.md` - Implementation progress (to be created)
+```powershell
+cd d:\gauntlet-ai\pocket-base-ai
 
-## Work Session Notes
+# Check status
+git status
 
-### Session 1: Memory Bank Initialization
-- **Date:** December 5, 2025
-- **Task:** Initialize memory bank structure
-- **Status:** ✅ Complete
-- **Notes:**
-  - Created all core memory bank files
-  - Extracted key information from PRD and task list
-  - Established project foundation and context
+# Stage all changes
+git add -A
 
-### Session 2: PR #1 Setup ✅ COMPLETE
-- **Date:** December 5, 2025
-- **Task:** Project Setup & Repository Configuration
-- **Status:** ✅ 100% complete (10/10 tasks done)
-- **Completed:**
-  - Repository forked and cloned to root directory
-  - Feature branch `feat/ai-query-setup` created
-  - Directory structure created (`services/ai/`, `ui/src/components/ai/`, `tests/integration/`, `docs/`)
-  - Documentation updated (README.md, docs/AI_QUERY_FEATURE.md)
-  - Go environment verified (go1.25.5)
-  - Node.js environment verified (v22.12.0)
-  - UI build successful (`npm run build`)
-  - Go binary built successfully (`base.exe` in `examples/base/`)
-- **Notes:**
-  - Repository cloned to root directory (moved from subdirectory)
-  - Git repository moved to root (`.git` folder moved)
-  - All build verification steps passed
+# Commit
+git commit -m "V2: SQL Terminal with multi-statement and multi-row INSERT support
 
-### Session 3: PR #2 AI Settings ✅ COMPLETE
-- **Date:** December 5, 2025
-- **Task:** AI Settings Data Structure & Storage
-- **Status:** ✅ 100% complete (7/7 tasks done)
-- **Completed:**
-  - Created `core/ai_settings.go` with AISettings struct
-  - Added validation methods: `Validate()`, `ValidateProvider()`, `ValidateTemperature()`
-  - Modified `core/settings_model.go` to include AI field
-  - Added default values for AI settings (enabled=false, provider=openai, model=gpt-4o-mini, temperature=0.1)
-  - API key encryption handled automatically by existing Settings encryption system
-  - Created comprehensive unit tests in `core/ai_settings_test.go`
-  - Updated `core/settings_model_test.go` to include AI field in JSON test
-- **Files Created:**
-  - `core/ai_settings.go` - AI settings struct and validation
-  - `core/ai_settings_test.go` - Unit tests (all passing)
-- **Files Modified:**
-  - `core/settings_model.go` - Added AI field, defaults, validation
-  - `core/settings_model_test.go` - Updated test expectations
-- **Test Results:**
-  - All AI settings tests pass (9 test scenarios)
-  - All settings integration tests pass
-  - Settings can be saved/loaded from `_params` table
-- **Notes:**
-  - Feature branch `feat/ai-query-settings` created
-  - API key encryption works automatically via Settings.DBExport/loadParam
-  - No migration needed (adding field to existing JSON settings)
-  - Ready to proceed to PR #3
+Features:
+- Multi-statement SQL execution (separated by ;)
+- Multi-row INSERT (VALUES with multiple rows)
+- Individual results display for each statement
+- 'See in Collection' button with SPA navigation
+- AI and direct SQL modes
+- Schema explorer with field browser
 
-### Session 4: PR #3 OpenAI Client ✅ COMPLETE
-- **Date:** December 5, 2025
-- **Task:** OpenAI Client & LLM Communication
-- **Status:** ✅ 100% complete
-- **Completed:**
-  - Created `services/ai/errors.go` with custom error types
-  - Created `services/ai/openai_client.go` with HTTP client implementation
-  - Implemented timeout handling (30s default) with context
-  - Implemented retry logic for transient failures
-  - Created comprehensive unit tests in `services/ai/openai_client_test.go`
-- **Files Created:**
-  - `services/ai/errors.go` - Custom error types (AIClientError, AIRateLimitError, AIAuthError, AITimeoutError)
-  - `services/ai/openai_client.go` - OpenAI API client with retry logic
-  - `services/ai/openai_client_test.go` - Unit tests (all passing)
-- **Test Results:**
-  - All OpenAI client tests pass
-  - Mock HTTP server tests working correctly
-  - Error handling verified
+Bug Fixes:
+- Multi-line CREATE TABLE parsing
+- System collection SELECT allowed
+- AI results display and clearing
+- Table column visibility and scrolling
+- Generated SQL box overflow"
 
-### Session 5: PR #4 Schema Extraction & Prompt Building ✅ COMPLETE
-- **Date:** December 5, 2025
-- **Task:** Schema Extraction & Prompt Building
-- **Status:** ✅ 100% complete
-- **Completed:**
-  - Created `services/ai/schema_extractor.go` to convert collections to LLM-friendly format
-  - Created `services/ai/prompt_template.go` with system prompt template
-  - Created `services/ai/prompt_builder.go` to build system and user prompts
-  - Implemented relation field resolution (CollectionId → CollectionName)
-  - Created comprehensive unit tests
-- **Files Created:**
-  - `services/ai/schema_extractor.go` - Collection schema extraction
-  - `services/ai/schema_extractor_test.go` - Unit tests (all passing)
-  - `services/ai/prompt_template.go` - System prompt template with syntax rules
-  - `services/ai/prompt_builder.go` - Prompt construction logic
-  - `services/ai/prompt_builder_test.go` - Unit tests (all passing)
-- **Test Results:**
-  - All schema extraction tests pass
-  - All prompt builder tests pass
-  - Relation field resolution working correctly
+# Switch to main and merge
+git checkout main
+git merge feat/v2-multi-table-sql
+git push
+```
 
-### Session 6: PR #5 Filter Validation ✅ COMPLETE
-- **Date:** December 5, 2025
-- **Task:** Filter Validation & Query Execution
-- **Status:** ✅ 100% complete
-- **Completed:**
-  - Created `services/ai/filter_tokenizer.go` for parsing filter expressions
-  - Created `services/ai/filter_validator.go` for validating LLM-generated filters
-  - Implemented field existence checks
-  - Implemented operator compatibility validation
-  - Implemented datetime macro preprocessing
-  - Created comprehensive unit tests
-- **Files Created:**
-  - `services/ai/filter_tokenizer.go` - Filter expression tokenization
-  - `services/ai/filter_validator.go` - Filter validation logic
-  - `services/ai/filter_validator_test.go` - Unit tests (all passing)
-- **Test Results:**
-  - All filter validation tests pass
-  - Field name extraction working correctly
-  - Operator compatibility checks working
-  - Datetime macro handling working
+## Access Points
 
-### Session 7: PR #6 API Endpoint ✅ COMPLETE
-- **Date:** December 5, 2025
-- **Task:** API Endpoint Implementation
-- **Status:** ✅ 100% complete
-- **Completed:**
-  - Created `apis/ai_query.go` with `/api/ai/query` endpoint
-  - Implemented request/response structs (AIQueryRequest, AIQueryResponse)
-  - Implemented authentication and authorization checks
-  - Implemented collection API rule enforcement (listRule)
-  - Integrated all services (schema extraction, prompt building, LLM call, validation)
-  - Implemented optional filter execution with pagination
-  - Created comprehensive integration tests
-  - Registered route in `apis/base.go`
-- **Files Created:**
-  - `apis/ai_query.go` - API endpoint handler
-  - `apis/ai_query_test.go` - Integration tests (all passing)
-- **Files Modified:**
-  - `apis/base.go` - Added route registration
-- **Test Results:**
-  - All 8 integration tests pass:
-    - TestAIQueryAPI_Success (with/without execution)
-    - TestAIQueryAPI_Unauthorized
-    - TestAIQueryAPI_AIDisabled
-    - TestAIQueryAPI_InvalidCollection
-    - TestAIQueryAPI_EmptyQuery
-    - TestAIQueryAPI_ValidationError
-    - TestAIQueryAPI_LLMError
-    - TestAIQueryAPI_RespectsAPIRules
-- **Notes:**
-  - All backend components now complete
-  - API endpoint fully functional and tested
-  - Ready to proceed to PR #7 (Admin UI)
-
-### Session 8: PR #7 Admin UI — AI Query Sidebar Panel ✅ COMPLETE
-- **Date:** December 5, 2025
-- **Task:** Admin UI — AI Query Sidebar Panel
-- **Status:** ✅ 100% complete
-- **Completed:**
-  - Created `ui/src/stores/ai.js` with state management stores
-  - Created `ui/src/components/ai/AIQueryInput.svelte` - Query input component with collection selector
-  - Created `ui/src/components/ai/AIFilterDisplay.svelte` - Filter display with copy and apply buttons
-  - Created `ui/src/components/ai/AIQueryResults.svelte` - Results preview component
-  - Created `ui/src/components/ai/AIQueryPanel.svelte` - Main panel component
-  - Added route `/ai-query` in `ui/src/routes.js`
-  - Added AI Query sidebar menu item (robot icon) in `ui/src/App.svelte`
-  - Created `ui/src/scss/_ai.scss` for styling
-  - Improved empty state handling (shows message when no collections exist)
-  - UI build successful with no errors
-- **Files Created:**
-  - `ui/src/stores/ai.js` - State management stores
-  - `ui/src/components/ai/AIQueryInput.svelte` - Query input component
-  - `ui/src/components/ai/AIFilterDisplay.svelte` - Filter display component
-  - `ui/src/components/ai/AIQueryResults.svelte` - Results component
-  - `ui/src/components/ai/AIQueryPanel.svelte` - Main panel component
-  - `ui/src/scss/_ai.scss` - AI component styles
-- **Files Modified:**
-  - `ui/src/routes.js` - Added `/ai-query` route
-  - `ui/src/App.svelte` - Added sidebar menu item
-  - `ui/src/scss/main.scss` - Imported AI styles
-- **Features Implemented:**
-  - Natural language query input with textarea
-  - Collection dropdown selector (with empty state message)
-  - Search button with loading state
-  - Keyboard shortcut (Ctrl+Enter / Cmd+Enter)
-  - Generated filter display in code block
-  - Copy to clipboard functionality
-  - "Apply Filter" button to navigate to collection
-  - Results preview with pagination info
-  - "View in Collection" link
-  - Error handling and display
-  - Styling matches PocketBase Admin UI design
-- **Build Status:**
-  - UI build successful (no errors)
-  - All components compiled correctly
-  - Ready for manual testing
-- **Notes:**
-  - All frontend components complete for AI Query panel
-  - UI integrated into Admin UI sidebar
-  - Empty state handling improved for better UX
-  - Ready to proceed to PR #8 (AI Settings Page)
-
-### Session 9: PR #8 Admin UI — AI Settings Page ✅ COMPLETE
-- **Date:** December 5, 2025
-- **Task:** Admin UI — AI Settings Page
-- **Status:** ✅ 100% complete
-- **Completed:**
-  - Created `ui/src/pages/settings/AI.svelte` - Settings page with full functionality
-  - Created `ui/src/components/ai/AISettingsForm.svelte` - Reusable settings form component
-  - Implemented Test Connection functionality with error/success handling
-  - Added AI Settings to settings navigation (SettingsSidebar.svelte)
-  - Implemented settings save/load via PocketBase API
-  - Added conditional UI (hide API key field for Ollama provider)
-- **Files Created:**
-  - `ui/src/pages/settings/AI.svelte` - Settings page
-  - `ui/src/components/ai/AISettingsForm.svelte` - Settings form component
-- **Files Modified:**
-  - `ui/src/components/settings/SettingsSidebar.svelte` - Added AI Query navigation link
-  - `ui/src/routes.js` - Added `/settings/ai` route
-- **Features Implemented:**
-  - Enable/Disable toggle
-  - Provider dropdown (OpenAI, Ollama, Anthropic, Custom)
-  - API Base URL input with auto-fill based on provider
-  - API Key input (password-masked, hidden for Ollama)
-  - Model dropdown/input (provider-specific models)
-  - Temperature slider (0.0 - 1.0)
-  - Test Connection button with error/success handling
-  - Settings persistence via API
-  - Form validation and error handling
-- **Build Status:**
-  - UI build successful (no errors)
-  - All components compiled correctly
-  - Settings page fully functional
-- **Notes:**
-  - All frontend components complete
-  - Settings page integrated into Admin UI
-  - Test Connection functionality working
-  - Ready to proceed to PR #9 (Documentation & Final Polish)
-
-### Session 10: Testing & Bug Fixes ✅ COMPLETE
-- **Date:** December 6, 2025
-- **Task:** Manual Testing, Bug Fixes, and Data Population Script
-- **Status:** ✅ Complete
-- **Completed:**
-  - Fixed critical 404 error issue - URL construction problem (double slashes causing 301 redirects)
-  - Fixed GET vs POST request issue in frontend
-  - Route `/api/ai/query` now working correctly
-  - Created data population script for testing
-  - Verified AI Query feature is functional end-to-end
-- **Issues Fixed:**
-  - **404 Error:** Fixed URL construction in `ui/src/pages/settings/AI.svelte` and `ui/src/components/ai/AIQueryPanel.svelte`
-    - Problem: `ApiClient.baseURL` ends with `/`, causing `//api/ai/query` which triggers 301 redirect
-    - Solution: Added URL normalization to remove trailing slash before appending path
-  - **GET vs POST:** Browser was converting POST to GET due to 301 redirect
-    - Solution: Fixed URL construction, now sends proper POST requests
-- **Files Modified:**
-  - `ui/src/pages/settings/AI.svelte` - Fixed URL construction in testConnection function
-  - `ui/src/components/ai/AIQueryPanel.svelte` - Fixed URL construction in handleQuerySubmit function
-- **Files Created:**
-  - `examples/base/populate_test_data.go` - Go script to populate database with test data
-  - `examples/base/populate_data.ps1` - PowerShell script to run data population
-- **Test Data Created:**
-  - Collection: `users` with fields: name, email, age, status, city, salary, created_date
-  - 10 test records with varied data for testing AI queries
-- **Current Status:**
-  - ✅ All 9 PRs complete
-  - ✅ Route working correctly
-  - ✅ Frontend sending proper POST requests
-  - ✅ Ready for comprehensive testing with real data
-- **Notes:**
-  - The feature is fully functional and ready for production use
-  - Data population script available for easy testing setup
-  - All critical bugs resolved
-
-### Session 11: Full End-to-End Testing & Final Bug Fixes ✅ COMPLETE
-- **Date:** December 7, 2025
-- **Task:** Complete end-to-end testing with real LLM integration
-- **Status:** ✅ Complete - Feature fully working!
-- **Issues Fixed:**
-  1. **Schema Not Extracted Properly**
-     - Problem: PowerShell script used `schema` property but PocketBase 0.23+ requires `fields`
-     - Impact: Collection created with only `id` field, custom fields silently ignored
-     - Solution: Updated collection creation to use `fields` property
-  2. **API Key Configuration**
-     - Problem: API key had accidental `\t` (tab character) prefix
-     - Impact: OpenRouter returned authentication errors
-     - Solution: Re-entered API key without whitespace
-  3. **Results Display Issues**
-     - Problem: `AIQueryResults.svelte` showed N/A for all fields except ID
-     - Solution: Updated to filter system fields and show actual data
-  4. **"View in Collection" Link 404**
-     - Problem: Wrong URL format `/collections/{name}` instead of collection ID
-     - Solution: Use collection ID with correct URL format
-  5. **"Apply Filter" Navigation**
-     - Problem: SPA navigation triggered `reset()` clearing the filter
-     - Solution: Changed to open in new tab with `window.open()`
-- **Files Modified:**
-  - `apis/ai_query.go` - Added debug logging for troubleshooting
-  - `ui/src/components/ai/AIQueryResults.svelte` - Fixed field display and navigation
-  - `ui/src/components/ai/AIFilterDisplay.svelte` - Fixed "Apply Filter" to open in new tab
-  - `examples/base/add_test_data.ps1` - Fixed to use `fields` instead of `schema`
-- **AI Settings Used:**
-  - Provider: Custom (OpenRouter)
-  - API Base URL: `https://openrouter.ai/api/v1`
-  - Model: `openai/gpt-4o-mini`
-  - Temperature: 0.1
-- **Test Results:**
-  - ✅ Schema extraction: All 9 fields extracted correctly
-  - ✅ LLM filter generation: Valid filters like `department = "Engineering"`
-  - ✅ Query execution: Correct records returned
-  - ✅ Results display: Employee data shown properly
-  - ✅ Copy Filter: Works correctly
-  - ✅ Apply Filter: Opens collection with filter in new tab
-- **Current Limitations (By Design):**
-  - Single collection queries only
-  - No JOIN or aggregate support (PocketBase limitation)
-  - Relation queries supported via dot notation
-
-## Context for Next Session
-
-When resuming work:
-1. **Read all memory bank files** to understand project context
-2. **All PRs are complete** - feature is fully tested and working!
-3. **Feature is production-ready** - end-to-end testing successful
-4. **Consider enhancements:**
-   - Multi-collection/relation queries (show related collection schemas in prompts)
-   - Expand support for including related data in results
-   - Query history/saved queries feature
-   - Demo video or additional documentation
-
-**Note:** All backend components (PRs #1-6), AI Query UI (PR #7), Settings UI (PR #8), and Documentation (PR #9) are complete. Full end-to-end testing completed successfully with OpenRouter + GPT-4o-mini. Feature generates correct filters and returns accurate results.
-
-## Key Reminders
-
-- This is a **brownfield project** - we're forking and extending PocketBase
-- Must maintain **compatibility** with existing PocketBase architecture
-- Must respect **security model** - collection API rules enforced
-- Must be **configurable** - admin can enable/disable and choose LLM provider
-- **9 PRs planned** - follow sequential order
-- **35-45 hours estimated** total development time
-
+- **AI Query:** `/ai-query` (sidebar robot icon)
+- **SQL Terminal:** `/sql-terminal` (sidebar terminal icon)
+- **Settings:** `/settings/ai` (AI configuration)

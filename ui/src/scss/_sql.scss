@@ -1,0 +1,93 @@
+// SQL Terminal Component Styles
+
+.sql-terminal {
+    .terminal-sidebar {
+        :global(.schema-explorer) {
+            height: 100%;
+        }
+    }
+
+    .terminal-body {
+        :global(.sql-editor),
+        :global(.results-table-container) {
+            animation: slideUp 0.2s ease-out;
+        }
+    }
+}
+
+// SQL-specific animations
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// SQL syntax highlighting placeholders (for future enhancement)
+.sql-keyword {
+    color: var(--primaryColor);
+    font-weight: 600;
+}
+
+.sql-string {
+    color: var(--successColor);
+}
+
+.sql-number {
+    color: var(--warningColor);
+}
+
+.sql-comment {
+    color: var(--txtDisabledColor);
+    font-style: italic;
+}
+
+// Query history dropdown enhancements
+.query-history {
+    .history-dropdown {
+        animation: fadeInDown 0.15s ease-out;
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Mobile responsiveness for SQL Terminal
+@media (max-width: 900px) {
+    .sql-terminal {
+        flex-direction: column;
+
+        .terminal-sidebar {
+            width: 100%;
+            max-width: none;
+            height: auto;
+            max-height: 200px;
+            border-right: none;
+            border-bottom: 1px solid var(--baseAlt2Color);
+        }
+
+        .terminal-header {
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .header-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+}
+

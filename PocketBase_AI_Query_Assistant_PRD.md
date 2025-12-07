@@ -1,9 +1,18 @@
 # Product Requirements Document
 ## PocketBase AI Query Assistant
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Date:** December 2025  
-**Status:** Draft for Review
+**Status:** V1 Complete, V2 In Planning
+
+---
+
+## Version History
+
+| Version | Date | Status | Description |
+|---------|------|--------|-------------|
+| 1.0 | Dec 2025 | ✅ Complete | Single-collection AI Query with filter generation |
+| 2.0 | Dec 2025 | 🚧 Planning | Multi-table queries, SQL Terminal, dual output |
 
 ---
 
@@ -51,6 +60,18 @@ This is a **brownfield development project**. We will fork the PocketBase open-s
 | 8 | As an admin, I want to configure which LLM provider to use (OpenAI, local Ollama, etc.), so I can control costs and data privacy. |
 | 9 | As an admin, I want to enable/disable the AI query feature globally or per-collection, so I can control where it's available. |
 | 10 | As an admin, I want to see usage logs for AI queries, so I can monitor costs and detect abuse. |
+
+### 2.4 V2 User Stories — Multi-Table & SQL Terminal
+
+| # | User Story |
+|---|------------|
+| 11 | As a user, I want to query across multiple related tables (e.g., "orders with customer names"), so I can see combined data without manual joins. |
+| 12 | As a user, I want to see both the PocketBase filter AND the SQL equivalent, so I can choose which to use. |
+| 13 | As a user, I want to edit the generated query before executing it, so I can refine the results. |
+| 14 | As a developer, I want a SQL terminal to run raw SQL commands, so I can manage my database efficiently. |
+| 15 | As a developer, I want to create collections using SQL syntax (CREATE TABLE), so I can use familiar database commands. |
+| 16 | As a developer, I want INSERT/UPDATE/DELETE operations in SQL Terminal to create real PocketBase records, so changes appear in Admin UI. |
+| 17 | As a user, I want AI assistance in SQL Terminal, so I can describe what I want in plain English and get SQL generated. |
 
 ---
 
@@ -205,42 +226,251 @@ New settings section in Admin UI: **Settings → AI Query**
 
 ### Key Files to Modify/Create
 
+**V1 Files (✅ Complete):**
 ```
 pocketbase/
 ├── apis/
-│   └── ai_query.go          # NEW: API endpoint handler
+│   └── ai_query.go              # API endpoint handler
 ├── core/
-│   └── settings_ai.go       # NEW: AI settings struct
+│   └── ai_settings.go           # AI settings struct
+├── services/ai/
+│   ├── openai_client.go         # LLM API client
+│   ├── schema_extractor.go      # Collection schema extraction
+│   ├── prompt_builder.go        # Prompt construction
+│   └── filter_validator.go      # Filter validation
 ├── ui/src/
-│   ├── components/
-│   │   └── ai/
-│   │       ├── AIQueryInput.svelte    # NEW
-│   │       ├── AIQueryResults.svelte  # NEW
-│   │       └── AISettings.svelte      # NEW
-│   └── pages/
-│       └── collections/
-│           └── Records.svelte         # MODIFY: Add AI query UI
-└── examples/base/
-    └── main.go              # Entry point for testing
+│   ├── components/ai/
+│   │   ├── AIQueryPanel.svelte  # Main query panel
+│   │   ├── AIQueryInput.svelte  # Query input
+│   │   ├── AIFilterDisplay.svelte # Filter display
+│   │   ├── AIQueryResults.svelte  # Results display
+│   │   └── AISettingsForm.svelte  # Settings form
+│   └── pages/settings/
+│       └── AI.svelte            # Settings page
+```
+
+**V2 Files (🚧 Planned):**
+```
+pocketbase/
+├── apis/
+│   └── sql_terminal.go          # NEW: SQL Terminal API endpoints
+├── services/sql/
+│   ├── parser.go                # NEW: SQL statement parser
+│   ├── executor.go              # NEW: SQL execution via PocketBase APIs
+│   └── mapper.go                # NEW: SQL type → PocketBase field mapper
+├── services/ai/
+│   └── schema_extractor.go      # MODIFY: Extract ALL collections
+├── ui/src/
+│   ├── components/ai/
+│   │   ├── QueryTabs.svelte     # NEW: Filter/SQL tab switcher
+│   │   └── EditableCodeBlock.svelte # NEW: Editable query component
+│   ├── components/sql/
+│   │   ├── SQLEditor.svelte     # NEW: Code editor with syntax highlight
+│   │   ├── SchemaExplorer.svelte # NEW: Collections sidebar browser
+│   │   ├── ResultsTable.svelte  # NEW: Dynamic results display
+│   │   └── QueryHistory.svelte  # NEW: Command history
+│   ├── pages/
+│   │   └── SQLTerminal.svelte   # NEW: Main SQL Terminal page
+│   └── stores/
+│       └── sql.js               # NEW: SQL terminal state
 ```
 
 ---
 
-## 5. Out of Scope (V1)
+## 5. Out of Scope (V1) — Now in V2
 
-The following features are **explicitly excluded** from MVP to maintain scope:
+The following features were excluded from V1 MVP but are now being added in V2:
 
-| Feature | Reason | Future Version? |
-|---------|--------|-----------------|
-| Multi-collection joins | Complex `@collection` syntax requires advanced prompting | V2 |
-| Query history/favorites | Requires new database tables, UI work | V2 |
-| Natural language CREATE/UPDATE/DELETE | Security risk, scope creep | Maybe V3 |
-| Conversation memory | "Show me more like last query" context | V2 |
-| Embedding/vector search | Requires embedding model, index storage | V3 |
-| Usage billing/quotas | Rate limiting, cost tracking | V2 |
-| Fine-tuned models | Custom training on PocketBase syntax | Never (use prompt engineering) |
-| Streaming responses | Real-time token display | V2 |
-| Per-collection enable/disable | Granular control | V2 |
+| Feature | V1 Status | V2 Status |
+|---------|-----------|-----------|
+| Multi-collection joins | ❌ Excluded | ✅ **Now in V2** |
+| Natural language CREATE/UPDATE/DELETE | ❌ Excluded | ✅ **Now in V2 (SQL Terminal)** |
+| Query history/favorites | ❌ Excluded | 🔄 Future |
+| Conversation memory | ❌ Excluded | 🔄 Future |
+| Embedding/vector search | ❌ Excluded | 🔄 Future |
+| Usage billing/quotas | ❌ Excluded | 🔄 Future |
+| Streaming responses | ❌ Excluded | 🔄 Future |
+| Per-collection enable/disable | ❌ Excluded | 🔄 Future |
+
+---
+
+## 6. Version 2.0 Features
+
+### 6.1 Enhanced AI Query — Multi-Table Support
+
+**What's New:**
+- Query across **multiple collections** with JOINs
+- Support for **aggregates** (COUNT, SUM, AVG, etc.)
+- **Dual output** — Both Filter and SQL shown in tabs
+- **Editable queries** — Modify generated query before executing
+- **Complex queries** — GROUP BY, HAVING, subqueries
+
+**Dual Output UI:**
+```
+┌─────────────────────────────────────────────────┐
+│  AI Query Results                               │
+├─────────────────────────────────────────────────┤
+│  ┌────────┐ ┌─────┐                             │
+│  │ Filter │ │ SQL │  ← Click to switch tabs     │
+│  └────────┘ └─────┘                             │
+├─────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────┐    │
+│  │ status = "active" && total > 100        │    │  ← Editable!
+│  └─────────────────────────────────────────┘    │
+│  [Copy] [Execute] [Apply to Collection]         │
+├─────────────────────────────────────────────────┤
+│  Results: 42 records                            │
+└─────────────────────────────────────────────────┘
+```
+
+**Example Multi-Table Queries:**
+
+| Natural Language | Generated SQL |
+|------------------|---------------|
+| "orders with customer names" | `SELECT o.*, c.name FROM orders o JOIN customers c ON o.customer = c.id` |
+| "total revenue by category" | `SELECT category, SUM(total) FROM orders GROUP BY category` |
+| "customers who spent over $1000" | `SELECT c.*, SUM(o.total) as spent FROM customers c JOIN orders o ON c.id = o.customer GROUP BY c.id HAVING spent > 1000` |
+
+### 6.2 SQL Terminal — Full Database Console
+
+A complete database management tool built into PocketBase Admin UI.
+
+**Key Features:**
+- **Two Modes:**
+  - **AI Mode** — Type natural language, AI generates and executes SQL
+  - **SQL Mode** — Type raw SQL directly
+- **Full Database Access:**
+  - SELECT, INSERT, UPDATE, DELETE
+  - CREATE TABLE, ALTER TABLE, DROP TABLE
+  - All operations create **real PocketBase collections** (not raw SQLite tables)
+- **Developer Tools:**
+  - Syntax highlighting
+  - Auto-complete for table/column names
+  - Command history (up/down arrows)
+  - Export results to CSV/JSON
+  - Schema browser sidebar
+
+**UI Mockup:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🖥️ SQL Terminal                           [AI Mode ●] [SQL Mode]│
+├─────────────────────────────────────────────────────────────────┤
+│  Schema Browser:              │  Query Editor:                  │
+│  ┌─────────────────────┐      │  ┌─────────────────────────────┐│
+│  │ 📁 Collections      │      │  │ CREATE TABLE products (     ││
+│  │   ├─ orders        │      │  │   name TEXT NOT NULL,       ││
+│  │   ├─ customers     │      │  │   price NUMBER,             ││
+│  │   └─ products ←NEW │      │  │   category TEXT             ││
+│  └─────────────────────┘      │  │ );                          ││
+│                               │  └─────────────────────────────┘│
+│                               │  [▶ Run] [Clear] [History ▼]    │
+├───────────────────────────────┴─────────────────────────────────┤
+│  Output:                                        [Export CSV]    │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │ ✅ Collection 'products' created successfully               ││
+│  │    Fields: name (text), price (number), category (text)     ││
+│  │    → View in Collections                                    ││
+│  └─────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**SQL → PocketBase Collection Mapping:**
+
+| SQL Command | PocketBase Action |
+|-------------|-------------------|
+| `CREATE TABLE products (name TEXT, price REAL)` | Creates PocketBase collection with fields |
+| `ALTER TABLE products ADD COLUMN stock INT` | Adds field to collection schema |
+| `DROP TABLE products` | Deletes collection |
+| `INSERT INTO products VALUES (...)` | Creates record via PocketBase API |
+| `UPDATE products SET price = 19.99 WHERE id = 'x'` | Updates record via PocketBase API |
+| `DELETE FROM products WHERE stock = 0` | Deletes records via PocketBase API |
+
+**SQL Type → PocketBase Field Type Mapping:**
+
+| SQL Type | PocketBase Field |
+|----------|------------------|
+| `TEXT`, `VARCHAR` | text |
+| `INTEGER`, `INT` | number |
+| `REAL`, `FLOAT` | number |
+| `BOOLEAN` | bool |
+| `DATE`, `DATETIME` | date |
+| `TEXT REFERENCES table(id)` | relation |
+| `TEXT CHECK(value IN (...))` | select |
+
+### 6.3 New API Endpoints (V2)
+
+**Enhanced AI Query:**
+
+`POST /api/ai/query` (updated response)
+```json
+{
+  "query": "orders with customer names where total > 100",
+  "execute": true
+}
+
+// Response now includes both filter AND SQL:
+{
+  "filter": "total > 100",
+  "filterCollection": "orders",
+  "sql": "SELECT o.*, c.name FROM orders o JOIN customers c ON o.customer = c.id WHERE o.total > 100",
+  "canUseFilter": true,
+  "results": [...],
+  "columns": ["id", "customer", "total", "customer_name"]
+}
+```
+
+**SQL Terminal Execute:**
+
+`POST /api/sql/execute`
+```json
+{
+  "sql": "CREATE TABLE products (name TEXT NOT NULL, price REAL)"
+}
+
+// Response:
+{
+  "type": "create",
+  "collection": "products",
+  "fields": [
+    {"name": "name", "type": "text", "required": true},
+    {"name": "price", "type": "number"}
+  ],
+  "message": "Collection 'products' created successfully"
+}
+```
+
+**SQL Terminal AI Mode:**
+
+`POST /api/sql/ai`
+```json
+{
+  "query": "Create a products table with name, price, and category"
+}
+
+// Response:
+{
+  "sql": "CREATE TABLE products (name TEXT NOT NULL, price REAL, category TEXT)",
+  "explanation": "Creates a 'products' collection with three fields"
+}
+```
+
+### 6.4 Access Control (V2)
+
+| Feature | Access Level |
+|---------|--------------|
+| AI Query (read) | Any authenticated user |
+| SQL Terminal (read) | Any authenticated user |
+| SQL Terminal (write) | Any authenticated user |
+| SQL Terminal Settings | Superuser only |
+
+### 6.5 Security Considerations (V2)
+
+| Risk | Mitigation |
+|------|------------|
+| SQL Injection | Validate table names exist, parameterize where possible |
+| Accidental Data Loss | Confirmation dialog for DROP/DELETE operations |
+| Resource Exhaustion | Query timeout (30s), result limit (10,000 rows) |
+| Unauthorized Schema Changes | Optional superuser-only mode in settings |
 
 ---
 
@@ -291,32 +521,59 @@ The following features are **explicitly excluded** from MVP to maintain scope:
 
 ## 7. Success Criteria
 
-The feature is **complete** when:
+### V1 Success Criteria (✅ Complete)
 
-- [ ] User can type natural language query in Admin UI and see matching records
-- [ ] Generated PocketBase filter expression is displayed with copy button
-- [ ] LLM provider settings can be configured in Admin UI without code changes
-- [ ] API endpoint `/api/ai/query` works for authenticated users
-- [ ] Feature works with OpenAI API (`gpt-4o-mini` as default model)
-- [ ] Optional: Ollama support for local/private deployments
-- [ ] Invalid queries return helpful error messages, not crashes
-- [ ] Security: API respects collection rules, doesn't expose unauthorized data
-- [ ] Documentation complete: README, architecture overview, setup instructions
-- [ ] Demo video recorded showing feature end-to-end
+- [x] User can type natural language query in Admin UI and see matching records
+- [x] Generated PocketBase filter expression is displayed with copy button
+- [x] LLM provider settings can be configured in Admin UI without code changes
+- [x] API endpoint `/api/ai/query` works for authenticated users
+- [x] Feature works with OpenAI API (`gpt-4o-mini` as default model)
+- [x] Optional: Ollama support for local/private deployments
+- [x] Invalid queries return helpful error messages, not crashes
+- [x] Security: API respects collection rules, doesn't expose unauthorized data
+- [x] Documentation complete: README, architecture overview, setup instructions
+
+### V2 Success Criteria (🚧 In Progress)
+
+- [ ] Multi-table queries work with JOINs across related collections
+- [ ] Dual output shows both Filter and SQL in switchable tabs
+- [ ] Users can edit generated queries before executing
+- [ ] SQL Terminal page accessible from sidebar
+- [ ] SQL Terminal supports AI Mode (natural language → SQL)
+- [ ] SQL Terminal supports SQL Mode (direct SQL execution)
+- [ ] CREATE TABLE creates real PocketBase collections
+- [ ] INSERT/UPDATE/DELETE operations create/modify real records
+- [ ] Schema browser shows all collections in SQL Terminal
+- [ ] Query history saved and accessible
+- [ ] Export results to CSV/JSON
+- [ ] Changes immediately visible in Admin UI
 
 ---
 
 ## 8. Proposed Timeline
 
-| Day | Focus | Deliverables |
-|-----|-------|--------------|
-| **Day 1** | Setup & Learning | Fork repo, dev environment working, Go/Svelte basics, codebase map |
-| **Day 2** | Architecture | Detailed technical design, identify all files to modify, POC of LLM call |
-| **Day 3** | Backend Core | API endpoint, LLM integration, prompt engineering, basic filter generation |
-| **Day 4** | Backend Polish | Schema injection, validation layer, error handling, settings storage |
-| **Day 5** | Frontend Core | AI query input component, results display, integration with records page |
-| **Day 6** | Frontend Polish | Settings panel, loading states, copy button, error messages |
-| **Day 7** | Finalize | Testing, bug fixes, documentation, demo video |
+### V1 Timeline (✅ Complete — 38 hours)
+
+| Day | Focus | Status |
+|-----|-------|--------|
+| Day 1-2 | Setup & Settings | ✅ Complete |
+| Day 3-4 | Backend (API, LLM, Validation) | ✅ Complete |
+| Day 5-6 | Frontend (AI Query, Settings) | ✅ Complete |
+| Day 7 | Testing & Documentation | ✅ Complete |
+
+### V2 Timeline (Estimated 41-50 hours)
+
+| Phase | Focus | Est. Hours |
+|-------|-------|------------|
+| **Phase 1** | Multi-Collection Schema (PR #10) | 4-5 |
+| **Phase 2** | Dual Output Backend (PR #11) | 5-6 |
+| **Phase 3** | Editable Query UI (PR #12) | 4-5 |
+| **Phase 4** | SQL Parser & Mapper (PR #13) | 6-7 |
+| **Phase 5** | SQL Executor (PR #14) | 6-7 |
+| **Phase 6** | SQL Terminal API (PR #15) | 5-6 |
+| **Phase 7** | SQL Terminal UI (PR #16) | 8-10 |
+| **Phase 8** | Documentation (PR #17) | 3-4 |
+| **Total** | | **41-50 hours** |
 
 ---
 

@@ -114,6 +114,16 @@
                     <i class="ri-robot-line" />
                 </a>
                 <a
+                    href="/sql-terminal"
+                    class="menu-item"
+                    aria-label="SQL Terminal"
+                    use:link
+                    use:active={{ path: "/sql-terminal/?.*", className: "current-route" }}
+                    use:tooltip={{ text: "SQL Terminal", position: "right" }}
+                >
+                    <i class="ri-terminal-box-line" />
+                </a>
+                <a
                     href="/logs"
                     class="menu-item"
                     aria-label="Logs"

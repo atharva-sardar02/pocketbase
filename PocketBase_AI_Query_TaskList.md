@@ -4,54 +4,96 @@
 
 **Repository:** Fork of https://github.com/pocketbase/pocketbase  
 **Feature:** AI-powered natural language query assistant  
-**Total PRs:** 8  
+**Total PRs:** 17 (V1: 9 ✅ Complete, V2: 8 🚧 Planned)
+
+---
+
+## Version Summary
+
+| Version | PRs | Status | Features |
+|---------|-----|--------|----------|
+| V1 | #1-9 | ✅ Complete | Single-collection AI Query, Filter generation, Settings UI |
+| V2 | #10-17 | 🚧 Planned | Multi-table queries, Dual output, SQL Terminal |  
 
 ---
 
 ## File Structure Overview
 
+### V1 Files (✅ Complete)
+
 ```
 pocketbase/                          # Forked repository root
 ├── apis/
-│   ├── ai_query.go                  # NEW — API endpoint handler
-│   └── ai_query_test.go             # NEW — API endpoint tests
+│   ├── ai_query.go                  # ✅ API endpoint handler
+│   └── ai_query_test.go             # ✅ API endpoint tests
 ├── core/
-│   ├── ai_settings.go               # NEW — AI settings struct & validation
-│   ├── ai_settings_test.go          # NEW — Settings tests
-│   └── settings.go                  # MODIFY — Add AI settings to main settings
+│   ├── ai_settings.go               # ✅ AI settings struct & validation
+│   ├── ai_settings_test.go          # ✅ Settings tests
+│   └── settings.go                  # ✅ MODIFIED — Added AI settings
 ├── services/
 │   └── ai/
-│       ├── openai_client.go         # NEW — OpenAI API client
-│       ├── openai_client_test.go    # NEW — Client tests (mocked)
-│       ├── prompt_builder.go        # NEW — System prompt construction
-│       ├── prompt_builder_test.go   # NEW — Prompt tests
-│       ├── schema_extractor.go      # NEW — Collection schema extraction
-│       ├── schema_extractor_test.go # NEW — Schema extraction tests
-│       ├── filter_validator.go      # NEW — Filter syntax validation
-│       └── filter_validator_test.go # NEW — Validation tests
-├── ui/
-│   ├── src/
-│   │   ├── components/
-│   │   │   └── ai/
-│   │   │       ├── AIQueryPanel.svelte      # NEW — Main sidebar panel
-│   │   │       ├── AIQueryInput.svelte      # NEW — Query input component
-│   │   │       ├── AIQueryResults.svelte    # NEW — Results display
-│   │   │       ├── AIFilterDisplay.svelte   # NEW — Filter with copy button
-│   │   │       └── AISettingsForm.svelte    # NEW — Settings form component
-│   │   ├── pages/
-│   │   │   └── settings/
-│   │   │       └── AI.svelte                # NEW — AI settings page
-│   │   ├── stores/
-│   │   │   └── ai.js                        # NEW — AI-related state store
-│   │   └── App.svelte                       # MODIFY — Add sidebar entry
-│   └── package.json                         # MODIFY — Add any new dependencies
-├── examples/base/
-│   └── main.go                              # Entry point (no changes needed)
-├── tests/
-│   └── integration/
-│       └── ai_query_integration_test.go     # NEW — E2E integration tests
+│       ├── openai_client.go         # ✅ OpenAI API client
+│       ├── openai_client_test.go    # ✅ Client tests (mocked)
+│       ├── prompt_builder.go        # ✅ System prompt construction
+│       ├── prompt_builder_test.go   # ✅ Prompt tests
+│       ├── prompt_template.go       # ✅ Prompt template
+│       ├── schema_extractor.go      # ✅ Collection schema extraction
+│       ├── schema_extractor_test.go # ✅ Schema extraction tests
+│       ├── filter_validator.go      # ✅ Filter syntax validation
+│       ├── filter_validator_test.go # ✅ Validation tests
+│       ├── filter_tokenizer.go      # ✅ Filter parsing
+│       └── errors.go                # ✅ Custom error types
+├── ui/src/
+│   ├── components/ai/
+│   │   ├── AIQueryPanel.svelte      # ✅ Main sidebar panel
+│   │   ├── AIQueryInput.svelte      # ✅ Query input component
+│   │   ├── AIQueryResults.svelte    # ✅ Results display
+│   │   ├── AIFilterDisplay.svelte   # ✅ Filter with copy button
+│   │   └── AISettingsForm.svelte    # ✅ Settings form component
+│   ├── pages/settings/
+│   │   └── AI.svelte                # ✅ AI settings page
+│   ├── stores/
+│   │   └── ai.js                    # ✅ AI-related state store
+│   └── App.svelte                   # ✅ MODIFIED — Added sidebar entry
 └── docs/
-    └── AI_QUERY_FEATURE.md                  # NEW — Feature documentation
+    └── AI_QUERY_FEATURE.md          # ✅ Feature documentation
+```
+
+### V2 Files (🚧 Planned)
+
+```
+pocketbase/
+├── apis/
+│   └── sql_terminal.go              # NEW — SQL Terminal API endpoints
+│   └── sql_terminal_test.go         # NEW — SQL Terminal tests
+├── services/
+│   ├── ai/
+│   │   ├── schema_extractor.go      # MODIFY — Extract ALL collections + relationships
+│   │   └── prompt_template.go       # MODIFY — Add SQL syntax rules
+│   └── sql/                         # NEW DIRECTORY
+│       ├── parser.go                # NEW — SQL statement parser
+│       ├── parser_test.go           # NEW — Parser tests
+│       ├── executor.go              # NEW — SQL execution via PocketBase APIs
+│       ├── executor_test.go         # NEW — Executor tests
+│       ├── mapper.go                # NEW — SQL type → PocketBase field mapper
+│       └── mapper_test.go           # NEW — Mapper tests
+├── ui/src/
+│   ├── components/ai/
+│   │   ├── AIQueryPanel.svelte      # MODIFY — Add dual output tabs
+│   │   ├── QueryTabs.svelte         # NEW — Filter/SQL tab switcher
+│   │   └── EditableCodeBlock.svelte # NEW — Editable query with syntax highlight
+│   ├── components/sql/              # NEW DIRECTORY
+│   │   ├── SQLEditor.svelte         # NEW — Code editor component
+│   │   ├── SchemaExplorer.svelte    # NEW — Collections sidebar browser
+│   │   ├── ResultsTable.svelte      # NEW — Dynamic results display
+│   │   └── QueryHistory.svelte      # NEW — Command history dropdown
+│   ├── pages/
+│   │   └── SQLTerminal.svelte       # NEW — Main SQL Terminal page
+│   ├── stores/
+│   │   └── sql.js                   # NEW — SQL terminal state
+│   └── App.svelte                   # MODIFY — Add SQL Terminal to sidebar
+└── docs/
+    └── SQL_TERMINAL_FEATURE.md      # NEW — SQL Terminal documentation
 ```
 
 ---
@@ -668,14 +710,458 @@ go test ./... -v -cover
 ```
 
 ### Verification
+- [x] All tests pass
+- [x] Documentation is complete and accurate
+- [ ] Demo video recorded successfully (optional)
+- [x] Feature works end-to-end
+
+---
+
+# V2 PRs: Multi-Table SQL Queries & SQL Terminal
+
+---
+
+## PR #10: Multi-Collection Schema Extraction
+
+**Branch:** `feat/ai-query-multi-schema`  
+**Estimated Time:** 4-5 hours  
+**Dependencies:** V1 Complete (PR #9)  
+
+### Description
+Extend schema extraction to include ALL collections and their relationships, enabling multi-table queries.
+
+### Tasks
+
+- [ ] **10.1** Modify `services/ai/schema_extractor.go`:
+  - [ ] `ExtractAllSchemas(app *pocketbase.PocketBase) string` — extracts all collection schemas
+  - [ ] Include relationship mappings between collections
+  - [ ] Format schema for LLM understanding of JOINs
+- [ ] **10.2** Create relationship detection:
+  - [ ] Parse relation fields to identify foreign keys
+  - [ ] Build relationship map (e.g., `orders.customer → customers.id`)
+- [ ] **10.3** Update prompt template with multi-table examples
+- [ ] **10.4** Write unit tests for multi-collection schema
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `services/ai/schema_extractor.go` | MODIFY | Add multi-collection extraction |
+| `services/ai/schema_extractor_test.go` | MODIFY | Add multi-collection tests |
+| `services/ai/prompt_template.go` | MODIFY | Add SQL syntax and multi-table examples |
+
+### Tests
+> ✅ **Unit Tests Required**
+
+```go
+func TestExtractAllSchemas(t *testing.T)
+func TestExtractRelationships(t *testing.T)
+func TestSchemaFormatForJoins(t *testing.T)
+```
+
+---
+
+## PR #11: Dual Output Backend (Filter + SQL)
+
+**Branch:** `feat/ai-query-dual-output`  
+**Estimated Time:** 5-6 hours  
+**Dependencies:** PR #10  
+
+### Description
+Modify AI Query API to return BOTH PocketBase filter AND SQL for queries where both are possible.
+
+### Tasks
+
+- [ ] **11.1** Update `apis/ai_query.go`:
+  - [ ] Generate both filter and SQL outputs
+  - [ ] Add `canUseFilter` field to response
+  - [ ] Add `sql` field to response
+  - [ ] Detect when query requires SQL-only (JOINs, aggregates)
+- [ ] **11.2** Update prompt template to request dual output
+- [ ] **11.3** Implement query complexity detection:
+  - [ ] Simple (single table, basic conditions) → Filter works
+  - [ ] Complex (JOINs, GROUP BY, aggregates) → SQL only
+- [ ] **11.4** Update response schema
+- [ ] **11.5** Write integration tests
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `apis/ai_query.go` | MODIFY | Add dual output logic |
+| `apis/ai_query_test.go` | MODIFY | Add dual output tests |
+| `services/ai/prompt_template.go` | MODIFY | Request dual output from LLM |
+
+### Tests
+> ✅ **Integration Tests Required**
+
+```go
+func TestAIQueryAPI_DualOutput_SimpleQuery(t *testing.T)
+func TestAIQueryAPI_DualOutput_ComplexQuery(t *testing.T)
+func TestAIQueryAPI_SQLOnlyForJoins(t *testing.T)
+```
+
+---
+
+## PR #12: Editable Query UI with Tabs
+
+**Branch:** `feat/ai-query-editable-ui`  
+**Estimated Time:** 4-5 hours  
+**Dependencies:** PR #11  
+
+### Description
+Update AI Query panel with tabbed interface (Filter/SQL) and editable query blocks.
+
+### Tasks
+
+- [ ] **12.1** Create `ui/src/components/ai/QueryTabs.svelte`:
+  - [ ] Tab component with Filter/SQL options
+  - [ ] Active tab state management
+  - [ ] Disable tab when option not available
+- [ ] **12.2** Create `ui/src/components/ai/EditableCodeBlock.svelte`:
+  - [ ] Textarea with syntax highlighting (basic)
+  - [ ] Edit mode toggle
+  - [ ] Re-execute button after editing
+- [ ] **12.3** Modify `AIQueryPanel.svelte`:
+  - [ ] Integrate tabs component
+  - [ ] Handle dual response (filter + SQL)
+  - [ ] Show appropriate output in each tab
+- [ ] **12.4** Modify `AIFilterDisplay.svelte`:
+  - [ ] Make filter editable
+  - [ ] Add execute button
+- [ ] **12.5** Update stores for dual state
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `ui/src/components/ai/QueryTabs.svelte` | CREATE | Tab switcher component |
+| `ui/src/components/ai/EditableCodeBlock.svelte` | CREATE | Editable code block |
+| `ui/src/components/ai/AIQueryPanel.svelte` | MODIFY | Add tabs and dual output |
+| `ui/src/components/ai/AIFilterDisplay.svelte` | MODIFY | Make editable |
+| `ui/src/stores/ai.js` | MODIFY | Add SQL state |
+
+### Tests
+> ❌ **No automated tests** — Manual UI testing
+
+**Manual Test Checklist:**
+- [ ] Filter tab shows PocketBase filter syntax
+- [ ] SQL tab shows SQL query
+- [ ] Tabs switch correctly
+- [ ] SQL tab disabled when filter-only query
+- [ ] Editing filter and re-executing works
+- [ ] Editing SQL and re-executing works
+
+---
+
+## PR #13: SQL Parser & Type Mapper
+
+**Branch:** `feat/sql-parser`  
+**Estimated Time:** 6-7 hours  
+**Dependencies:** PR #10  
+
+### Description
+Create SQL parser to understand SQL statements and map SQL types to PocketBase field types.
+
+### Tasks
+
+- [ ] **13.1** Create `services/sql/parser.go`:
+  - [ ] `ParseSQL(sql string) (*SQLStatement, error)`
+  - [ ] Detect statement type (SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, DROP)
+  - [ ] Extract table names
+  - [ ] Extract column definitions (for CREATE TABLE)
+  - [ ] Extract WHERE clauses
+- [ ] **13.2** Create `services/sql/mapper.go`:
+  - [ ] `MapSQLType(sqlType string) string` — returns PocketBase field type
+  - [ ] Handle TEXT → text, INTEGER → number, REAL → number, etc.
+  - [ ] Handle REFERENCES → relation
+  - [ ] Handle CHECK(IN(...)) → select
+- [ ] **13.3** Create SQL statement structs:
+  ```go
+  type SQLStatement struct {
+      Type       string   // SELECT, INSERT, CREATE, etc.
+      Tables     []string
+      Columns    []ColumnDef
+      Where      string
+      Values     []interface{}
+  }
+  
+  type ColumnDef struct {
+      Name       string
+      Type       string
+      Required   bool
+      Reference  string // For relations
+      Options    []string // For select fields
+  }
+  ```
+- [ ] **13.4** Write comprehensive parser tests
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `services/sql/parser.go` | CREATE | SQL statement parser |
+| `services/sql/parser_test.go` | CREATE | Parser tests |
+| `services/sql/mapper.go` | CREATE | SQL → PocketBase type mapper |
+| `services/sql/mapper_test.go` | CREATE | Mapper tests |
+
+### Tests
+> ✅ **Unit Tests Required**
+
+```go
+func TestParseSQL_Select(t *testing.T)
+func TestParseSQL_Insert(t *testing.T)
+func TestParseSQL_Update(t *testing.T)
+func TestParseSQL_Delete(t *testing.T)
+func TestParseSQL_CreateTable(t *testing.T)
+func TestParseSQL_AlterTable(t *testing.T)
+func TestParseSQL_DropTable(t *testing.T)
+func TestMapSQLType_Text(t *testing.T)
+func TestMapSQLType_Number(t *testing.T)
+func TestMapSQLType_Relation(t *testing.T)
+func TestMapSQLType_Select(t *testing.T)
+```
+
+---
+
+## PR #14: SQL Executor (PocketBase API Integration)
+
+**Branch:** `feat/sql-executor`  
+**Estimated Time:** 6-7 hours  
+**Dependencies:** PR #13  
+
+### Description
+Execute parsed SQL statements using PocketBase APIs to create real collections and records.
+
+### Tasks
+
+- [ ] **14.1** Create `services/sql/executor.go`:
+  - [ ] `ExecuteSQL(app *pocketbase.PocketBase, stmt *SQLStatement) (*ExecutionResult, error)`
+  - [ ] Route to appropriate handler based on statement type
+- [ ] **14.2** Implement CREATE TABLE handler:
+  - [ ] Convert parsed columns to PocketBase fields
+  - [ ] Create collection via PocketBase Collection API
+  - [ ] Return created collection info
+- [ ] **14.3** Implement ALTER TABLE handler:
+  - [ ] Add/modify/drop fields in existing collection
+- [ ] **14.4** Implement DROP TABLE handler:
+  - [ ] Delete collection via PocketBase API
+- [ ] **14.5** Implement INSERT handler:
+  - [ ] Create record via PocketBase Records API
+  - [ ] Return created record ID
+- [ ] **14.6** Implement UPDATE handler:
+  - [ ] Update records via PocketBase Records API
+  - [ ] Return affected row count
+- [ ] **14.7** Implement DELETE handler:
+  - [ ] Delete records via PocketBase Records API
+  - [ ] Return affected row count
+- [ ] **14.8** Implement SELECT handler:
+  - [ ] Execute query directly against SQLite
+  - [ ] Return results with column names
+- [ ] **14.9** Add query timeout and result limits
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `services/sql/executor.go` | CREATE | SQL execution engine |
+| `services/sql/executor_test.go` | CREATE | Executor tests |
+
+### Tests
+> ✅ **Integration Tests Required**
+
+```go
+func TestExecuteSQL_CreateTable(t *testing.T)
+func TestExecuteSQL_Insert(t *testing.T)
+func TestExecuteSQL_Update(t *testing.T)
+func TestExecuteSQL_Delete(t *testing.T)
+func TestExecuteSQL_Select(t *testing.T)
+func TestExecuteSQL_SelectWithJoin(t *testing.T)
+func TestExecuteSQL_Timeout(t *testing.T)
+```
+
+---
+
+## PR #15: SQL Terminal API Endpoints
+
+**Branch:** `feat/sql-terminal-api`  
+**Estimated Time:** 5-6 hours  
+**Dependencies:** PR #14  
+
+### Description
+Create API endpoints for SQL Terminal functionality.
+
+### Tasks
+
+- [ ] **15.1** Create `apis/sql_terminal.go`:
+  - [ ] `POST /api/sql/execute` — Execute raw SQL
+  - [ ] `POST /api/sql/ai` — AI mode (natural language → SQL)
+  - [ ] `GET /api/sql/history` — Get query history (optional)
+- [ ] **15.2** Implement execute endpoint:
+  - [ ] Parse SQL using parser
+  - [ ] Execute using executor
+  - [ ] Return structured response
+- [ ] **15.3** Implement AI mode endpoint:
+  - [ ] Build SQL-focused prompt
+  - [ ] Call LLM to generate SQL
+  - [ ] Optionally execute generated SQL
+  - [ ] Return SQL + results
+- [ ] **15.4** Add authentication (require logged-in user)
+- [ ] **15.5** Add confirmation requirement for destructive operations
+- [ ] **15.6** Register routes in `apis/base.go`
+- [ ] **15.7** Write integration tests
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `apis/sql_terminal.go` | CREATE | SQL Terminal API endpoints |
+| `apis/sql_terminal_test.go` | CREATE | API tests |
+| `apis/base.go` | MODIFY | Register SQL routes |
+
+### Tests
+> ✅ **Integration Tests Required**
+
+```go
+func TestSQLTerminal_Execute_Select(t *testing.T)
+func TestSQLTerminal_Execute_CreateTable(t *testing.T)
+func TestSQLTerminal_Execute_Insert(t *testing.T)
+func TestSQLTerminal_AI_GenerateSQL(t *testing.T)
+func TestSQLTerminal_Unauthorized(t *testing.T)
+```
+
+---
+
+## PR #16: SQL Terminal UI
+
+**Branch:** `feat/sql-terminal-ui`  
+**Estimated Time:** 8-10 hours  
+**Dependencies:** PR #15  
+
+### Description
+Build the SQL Terminal frontend page with code editor, schema browser, and results display.
+
+### Tasks
+
+- [ ] **16.1** Create `ui/src/pages/SQLTerminal.svelte`:
+  - [ ] Main page layout with sidebar and editor
+  - [ ] AI Mode / SQL Mode toggle
+  - [ ] Integration with API endpoints
+- [ ] **16.2** Create `ui/src/components/sql/SQLEditor.svelte`:
+  - [ ] Textarea with basic syntax highlighting
+  - [ ] Line numbers
+  - [ ] Keyboard shortcuts (Ctrl+Enter to run)
+  - [ ] Auto-complete for table/column names (basic)
+- [ ] **16.3** Create `ui/src/components/sql/SchemaExplorer.svelte`:
+  - [ ] Tree view of collections
+  - [ ] Expandable to show fields
+  - [ ] Click to insert table/field name
+- [ ] **16.4** Create `ui/src/components/sql/ResultsTable.svelte`:
+  - [ ] Dynamic column headers from query
+  - [ ] Scrollable data rows
+  - [ ] Export to CSV button
+  - [ ] Export to JSON button
+- [ ] **16.5** Create `ui/src/components/sql/QueryHistory.svelte`:
+  - [ ] Dropdown of recent queries
+  - [ ] Click to restore query
+  - [ ] Stored in localStorage
+- [ ] **16.6** Create `ui/src/stores/sql.js`:
+  - [ ] Current query
+  - [ ] Query results
+  - [ ] Loading state
+  - [ ] History
+  - [ ] Mode (AI/SQL)
+- [ ] **16.7** Modify `ui/src/App.svelte`:
+  - [ ] Add SQL Terminal to sidebar navigation
+  - [ ] Add route
+- [ ] **16.8** Create styles for SQL components
+- [ ] **16.9** Add confirmation dialogs for destructive operations
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `ui/src/pages/SQLTerminal.svelte` | CREATE | Main SQL Terminal page |
+| `ui/src/components/sql/SQLEditor.svelte` | CREATE | Code editor |
+| `ui/src/components/sql/SchemaExplorer.svelte` | CREATE | Schema browser |
+| `ui/src/components/sql/ResultsTable.svelte` | CREATE | Results display |
+| `ui/src/components/sql/QueryHistory.svelte` | CREATE | History dropdown |
+| `ui/src/stores/sql.js` | CREATE | SQL state management |
+| `ui/src/App.svelte` | MODIFY | Add sidebar entry |
+| `ui/src/scss/_sql.scss` | CREATE | SQL component styles |
+
+### Tests
+> ❌ **No automated tests** — Manual UI testing
+
+**Manual Test Checklist:**
+- [ ] SQL Terminal accessible from sidebar
+- [ ] SQL Mode: Can type and execute raw SQL
+- [ ] AI Mode: Can type natural language and get SQL
+- [ ] CREATE TABLE creates real collection (visible in Admin UI)
+- [ ] INSERT creates real records
+- [ ] UPDATE modifies records
+- [ ] DELETE removes records
+- [ ] SELECT returns results in table
+- [ ] Schema browser shows all collections
+- [ ] Query history saves and restores queries
+- [ ] Export to CSV works
+- [ ] Export to JSON works
+- [ ] Confirmation dialog for DROP/DELETE
+- [ ] Error messages display clearly
+
+---
+
+## PR #17: V2 Documentation & Polish
+
+**Branch:** `feat/v2-docs`  
+**Estimated Time:** 3-4 hours  
+**Dependencies:** PR #12, PR #16  
+
+### Description
+Complete V2 documentation and final testing.
+
+### Tasks
+
+- [ ] **17.1** Create `docs/SQL_TERMINAL_FEATURE.md`:
+  - [ ] Feature overview
+  - [ ] Setup instructions
+  - [ ] Usage guide (AI Mode vs SQL Mode)
+  - [ ] SQL → PocketBase mapping reference
+  - [ ] Security considerations
+- [ ] **17.2** Update `docs/AI_QUERY_FEATURE.md`:
+  - [ ] Add multi-table query examples
+  - [ ] Document dual output feature
+  - [ ] Add editable query documentation
+- [ ] **17.3** Update `README.md`:
+  - [ ] Add SQL Terminal to features
+  - [ ] Add screenshots
+- [ ] **17.4** Update `CHANGELOG.md`:
+  - [ ] Add V2 release notes
+- [ ] **17.5** Run full test suite
+- [ ] **17.6** Build final release binary
+- [ ] **17.7** End-to-end testing of all features
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `docs/SQL_TERMINAL_FEATURE.md` | CREATE | SQL Terminal documentation |
+| `docs/AI_QUERY_FEATURE.md` | MODIFY | Add V2 features |
+| `README.md` | MODIFY | Add SQL Terminal |
+| `CHANGELOG.md` | MODIFY | Add V2 release notes |
+
+### Verification
 - [ ] All tests pass
-- [ ] Documentation is complete and accurate
-- [ ] Demo video recorded successfully
-- [ ] Feature works end-to-end
+- [ ] Documentation is complete
+- [ ] Multi-table queries work end-to-end
+- [ ] SQL Terminal creates real collections
+- [ ] All changes visible in Admin UI
 
 ---
 
 ## Summary: Test Coverage Matrix
+
+### V1 Tests (✅ Complete)
 
 | PR | Unit Tests | Integration Tests | Manual Tests |
 |----|------------|-------------------|--------------|
@@ -689,15 +1175,29 @@ go test ./... -v -cover
 | PR #8: UI Settings | ❌ | ❌ | ✅ Full UI testing |
 | PR #9: Docs | ❌ | ✅ Full suite run | ✅ Demo recording |
 
+### V2 Tests (🚧 Planned)
+
+| PR | Unit Tests | Integration Tests | Manual Tests |
+|----|------------|-------------------|--------------|
+| PR #10: Multi-Schema | ✅ `schema_extractor_test.go` | ❌ | ❌ |
+| PR #11: Dual Output | ❌ | ✅ `ai_query_test.go` | ❌ |
+| PR #12: Editable UI | ❌ | ❌ | ✅ Full UI testing |
+| PR #13: SQL Parser | ✅ `parser_test.go`, `mapper_test.go` | ❌ | ❌ |
+| PR #14: SQL Executor | ✅ `executor_test.go` | ✅ Integration tests | ❌ |
+| PR #15: SQL Terminal API | ❌ | ✅ `sql_terminal_test.go` | ✅ curl/Postman |
+| PR #16: SQL Terminal UI | ❌ | ❌ | ✅ Full UI testing |
+| PR #17: V2 Docs | ❌ | ✅ Full suite run | ✅ E2E testing |
+
 ---
 
-## Quick Reference: All New Files
+## Quick Reference: All Files
+
+### V1 Files (✅ Complete)
 
 ```
 NEW FILES (18):
 ├── apis/ai_query.go
 ├── apis/ai_query_test.go
-├── apis/ai_settings.go
 ├── core/ai_settings.go
 ├── core/ai_settings_test.go
 ├── services/ai/openai_client.go
@@ -709,8 +1209,8 @@ NEW FILES (18):
 ├── services/ai/schema_extractor_test.go
 ├── services/ai/filter_validator.go
 ├── services/ai/filter_validator_test.go
-├── services/ai/errors.go
 ├── services/ai/filter_tokenizer.go
+├── services/ai/errors.go
 ├── ui/src/stores/ai.js
 ├── ui/src/components/ai/AIQueryInput.svelte
 ├── ui/src/components/ai/AIFilterDisplay.svelte
@@ -721,17 +1221,50 @@ NEW FILES (18):
 ├── ui/src/scss/_ai.scss
 ├── docs/AI_QUERY_FEATURE.md
 
-MODIFIED FILES (5):
+MODIFIED FILES (4):
 ├── core/settings.go
 ├── apis/base.go
 ├── ui/src/App.svelte
-├── ui/src/pages/settings/Index.svelte
 ├── README.md
+```
+
+### V2 Files (🚧 Planned)
+
+```
+NEW FILES (14):
+├── apis/sql_terminal.go
+├── apis/sql_terminal_test.go
+├── services/sql/parser.go
+├── services/sql/parser_test.go
+├── services/sql/executor.go
+├── services/sql/executor_test.go
+├── services/sql/mapper.go
+├── services/sql/mapper_test.go
+├── ui/src/stores/sql.js
+├── ui/src/components/ai/QueryTabs.svelte
+├── ui/src/components/ai/EditableCodeBlock.svelte
+├── ui/src/components/sql/SQLEditor.svelte
+├── ui/src/components/sql/SchemaExplorer.svelte
+├── ui/src/components/sql/ResultsTable.svelte
+├── ui/src/components/sql/QueryHistory.svelte
+├── ui/src/pages/SQLTerminal.svelte
+├── ui/src/scss/_sql.scss
+├── docs/SQL_TERMINAL_FEATURE.md
+
+MODIFIED FILES (6):
+├── services/ai/schema_extractor.go
+├── services/ai/prompt_template.go
+├── apis/ai_query.go
+├── apis/base.go
+├── ui/src/App.svelte
+├── ui/src/components/ai/AIQueryPanel.svelte
 ```
 
 ---
 
 ## Execution Order
+
+### V1 Execution (✅ Complete)
 
 ```
 PR #1 (Setup) 
@@ -753,9 +1286,56 @@ PR #8 (UI Settings) ←── Manual testing
 PR #9 (Docs) ←── Full test suite
 ```
 
+### V2 Execution (🚧 Planned)
+
+```
+                    PR #10 (Multi-Schema)
+                    ↓              ↓
+        PR #11 (Dual Output)   PR #13 (SQL Parser)
+                    ↓              ↓
+        PR #12 (Editable UI)   PR #14 (SQL Executor)
+                    ↓              ↓
+                    ↓          PR #15 (SQL Terminal API)
+                    ↓              ↓
+                    ↓          PR #16 (SQL Terminal UI)
+                    ↓              ↓
+                    └──────────────┴──→ PR #17 (V2 Docs)
+```
+
 ---
 
-**Document Status:** Ready for implementation  
-**Total Estimated Time:** 35-45 hours  
-**Total PRs:** 9  
-**Total Test Files:** 7
+## Time Estimates
+
+### V1 (✅ Complete)
+
+| Phase | Hours |
+|-------|-------|
+| Setup (PR #1) | 2-3 |
+| Backend (PRs #2-6) | 25-30 |
+| Frontend (PRs #7-8) | 10-13 |
+| Docs (PR #9) | 3-4 |
+| **V1 Total** | **38 hours** |
+
+### V2 (🚧 Planned)
+
+| Phase | Hours |
+|-------|-------|
+| Enhanced AI Query (PRs #10-12) | 13-16 |
+| SQL Terminal Backend (PRs #13-15) | 17-20 |
+| SQL Terminal UI (PR #16) | 8-10 |
+| Documentation (PR #17) | 3-4 |
+| **V2 Total** | **41-50 hours** |
+
+### Grand Total
+
+| Version | Status | Hours |
+|---------|--------|-------|
+| V1 | ✅ Complete | 38 |
+| V2 | 🚧 Planned | 41-50 |
+| **Total** | | **79-88 hours** |
+
+---
+
+**Document Status:** V1 Complete, V2 Ready for implementation  
+**Total PRs:** 17 (V1: 9 ✅, V2: 8 🚧)  
+**Total Test Files:** 14

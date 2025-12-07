@@ -1,7 +1,7 @@
 <script>
     import { push } from "svelte-spa-router";
     import { aiFilter, aiCollection } from "@/stores/ai";
-    import { collections } from "@/stores/collections";
+    import { collections, changeActiveCollectionByIdOrName } from "@/stores/collections";
     import CodeBlock from "@/components/base/CodeBlock.svelte";
     import CopyIcon from "@/components/base/CopyIcon.svelte";
     import { addSuccessToast } from "@/stores/toasts";
@@ -18,11 +18,14 @@
 
     function applyFilter() {
         if ($aiFilter && collectionId) {
-            // Open collection with filter in new tab to avoid state conflicts
-            // The PageRecords component resets filter when collection changes in SPA navigation
+            // Navigate to collection page with filter applied
             const filterParam = encodeURIComponent($aiFilter);
-            const url = `/_/#/collections?collection=${collectionId}&filter=${filterParam}`;
-            window.open(url, '_blank');
+            
+            // Set the active collection first
+            changeActiveCollectionByIdOrName(collectionId);
+            
+            // Navigate using SPA router with query params
+            push(`/collections?collection=${collectionId}&filter=${filterParam}`);
         }
     }
 </script>
@@ -37,8 +40,8 @@
                     <span class="txt">Copy</span>
                 </button>
                 <button type="button" class="btn btn-sm btn-primary" on:click={applyFilter}>
-                    <i class="ri-arrow-right-line" aria-hidden="true"></i>
-                    <span class="txt">Apply Filter</span>
+                    <i class="ri-eye-line" aria-hidden="true"></i>
+                    <span class="txt">See in Collection</span>
                 </button>
             </div>
         </div>

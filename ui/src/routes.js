@@ -10,6 +10,7 @@ import PageMail from "@/components/settings/PageMail.svelte";
 import PageStorage from "@/components/settings/PageStorage.svelte";
 import PageSuperuserLogin from "@/components/superusers/PageSuperuserLogin.svelte";
 import AIQueryPanel from "@/components/ai/AIQueryPanel.svelte";
+import SQLTerminal from "@/pages/SQLTerminal.svelte";
 import PageAI from "@/pages/settings/AI.svelte";
 import ApiClient from "@/utils/ApiClient";
 import { isTokenExpired } from "pocketbase";
@@ -56,6 +57,12 @@ const routes = {
 
     "/ai-query": wrap({
         component: AIQueryPanel,
+        conditions: [(_) => ApiClient.authStore.isValid],
+        userData: { showAppSidebar: true },
+    }),
+
+    "/sql-terminal": wrap({
+        component: SQLTerminal,
         conditions: [(_) => ApiClient.authStore.isValid],
         userData: { showAppSidebar: true },
     }),

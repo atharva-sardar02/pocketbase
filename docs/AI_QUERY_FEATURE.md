@@ -6,6 +6,7 @@ The AI Query Assistant is a feature extension to PocketBase that enables users t
 
 ## Features
 
+### Core Features (V1)
 - **Natural Language Query Interface** - Query collections using plain English in the Admin UI
 - **Schema-Aware Prompting** - Automatically understands your collection's field names and types
 - **Filter Expression Display** - Shows generated PocketBase filter syntax with copy functionality
@@ -13,6 +14,14 @@ The AI Query Assistant is a feature extension to PocketBase that enables users t
 - **Multiple LLM Provider Support** - Configure OpenAI, Ollama, Anthropic, or custom providers
 - **Security Integration** - Respects existing collection API rules and authentication
 - **Validation & Error Handling** - Validates generated filters and provides helpful error messages
+
+### V2 Enhancements
+- **Dual Output Mode** - Get both PocketBase filter AND SQL for any query
+- **Editable Code Blocks** - Edit generated filter/SQL before executing
+- **Tab Interface** - Switch between Filter and SQL views
+- **Multi-Collection Schema** - Supports queries across related collections
+- **SQL Terminal** - Full SQL interface (see [SQL_TERMINAL_FEATURE.md](./SQL_TERMINAL_FEATURE.md))
+- **Auto SQL Detection** - Identifies when SQL is required (JOINs, aggregations)
 
 ## Setup Instructions
 
@@ -154,7 +163,8 @@ Requires authentication via Bearer token (same as other PocketBase API endpoints
   "query": "show me all pending orders from last week",
   "execute": true,
   "page": 1,
-  "perPage": 30
+  "perPage": 30,
+  "mode": "dual"
 }
 ```
 
@@ -164,10 +174,11 @@ Requires authentication via Bearer token (same as other PocketBase API endpoints
 - `execute` (optional): Whether to execute the filter and return results (default: `false`)
 - `page` (optional): Page number for pagination (default: `1`)
 - `perPage` (optional): Records per page (default: `30`)
+- `mode` (optional, V2): Query mode - `"filter"`, `"dual"`, or `"sql"` (default: `"filter"`)
 
 #### Response
 
-**Success Response (200 OK):**
+**Success Response (200 OK) - Filter Mode:**
 
 ```json
 {
@@ -185,6 +196,26 @@ Requires authentication via Bearer token (same as other PocketBase API endpoints
   "perPage": 30
 }
 ```
+
+**Success Response (200 OK) - Dual Mode (V2):**
+
+```json
+{
+  "filter": "status = \"pending\" && created >= @now - 604800",
+  "sql": "SELECT * FROM orders WHERE status = 'pending' AND created >= datetime('now', '-7 days')",
+  "requiresSQL": false,
+  "canUseFilter": true,
+  "results": [...],
+  "totalItems": 42,
+  "page": 1,
+  "perPage": 30
+}
+```
+
+**V2 Response Fields:**
+- `sql`: Generated SQL query equivalent
+- `requiresSQL`: `true` if query requires SQL (JOINs, aggregations)
+- `canUseFilter`: `true` if PocketBase filter can be used
 
 **Error Response (400 Bad Request):**
 
@@ -250,6 +281,9 @@ console.log('Total Items:', response.totalItems);
 | Field | Type | Description |
 |-------|------|-------------|
 | `filter` | string | Generated PocketBase filter expression |
+| `sql` | string | Generated SQL query (V2, dual/sql mode only) |
+| `requiresSQL` | boolean | Whether SQL is required for this query (V2) |
+| `canUseFilter` | boolean | Whether filter can be used (V2) |
 | `results` | array | Matching records (if `execute: true`) |
 | `totalItems` | integer | Total matching records (if `execute: true`) |
 | `page` | integer | Current page number (if `execute: true`) |
@@ -398,13 +432,25 @@ console.log('Total Items:', response.totalItems);
 
 ### Components
 
+**Core AI Services:**
 - **`core/ai_settings.go`**: AI settings data structure and validation
 - **`services/ai/openai_client.go`**: LLM API client (OpenAI-compatible)
-- **`services/ai/schema_extractor.go`**: Collection schema extraction
-- **`services/ai/prompt_builder.go`**: System and user prompt construction
+- **`services/ai/schema_extractor.go`**: Collection schema extraction (V2: multi-collection support)
+- **`services/ai/prompt_builder.go`**: System and user prompt construction (V2: dual/SQL prompts)
+- **`services/ai/prompt_template.go`**: Prompt templates (V2: dual output, SQL terminal)
 - **`services/ai/filter_validator.go`**: Filter validation against collection schema
-- **`apis/ai_query.go`**: REST API endpoint handler
-- **`ui/src/components/ai/`**: Admin UI components
+- **`apis/ai_query.go`**: REST API endpoint handler (V2: dual mode support)
+
+**V2 SQL Services:**
+- **`services/sql/parser.go`**: SQL statement parser
+- **`services/sql/mapper.go`**: SQL type to PocketBase field mapper
+- **`services/sql/executor.go`**: SQL execution engine
+- **`apis/sql_terminal.go`**: SQL Terminal API endpoints
+
+**UI Components:**
+- **`ui/src/components/ai/`**: AI Query components
+- **`ui/src/components/sql/`**: SQL Terminal components (V2)
+- **`ui/src/pages/SQLTerminal.svelte`**: SQL Terminal page (V2)
 - **`ui/src/pages/settings/AI.svelte`**: Settings page
 
 ### Data Flow
@@ -426,13 +472,24 @@ console.log('Total Items:', response.totalItems);
 
 ## Limitations
 
-### Current Limitations (v1.0)
+### Current Limitations
 
+**V1 (Filter Mode):**
 1. **Single Collection Queries**: Cannot query across multiple collections in one query
 2. **No Aggregations**: Cannot generate aggregation queries (COUNT, SUM, etc.)
 3. **No Sorting**: Generated filters don't include sorting (use PocketBase's `sort` parameter)
 4. **English Only**: Natural language queries work best in English
 5. **Schema-Dependent**: Accuracy depends on clear field names and types
+
+**V2 (Dual/SQL Mode) - Improvements:**
+- ✅ Multi-collection queries supported via SQL
+- ✅ Aggregations supported via SQL (COUNT, SUM, AVG, etc.)
+- ✅ JOINs supported via SQL
+
+**V2 Remaining Limitations:**
+1. **Complex subqueries**: Limited support for nested SELECT statements
+2. **Transactions**: Individual statements only, no multi-statement transactions
+3. **English Only**: Natural language queries work best in English
 
 ### Known Issues
 
@@ -440,13 +497,50 @@ console.log('Total Items:', response.totalItems);
 - Very long queries may exceed LLM context limits
 - Some edge cases in filter validation may need refinement
 
+## V2 Features
+
+### Dual Output Mode
+
+Enable dual output mode to get both PocketBase filter and SQL for any query:
+
+```javascript
+const response = await pb.send('/api/ai/query', {
+  method: 'POST',
+  body: {
+    collection: 'orders',
+    query: 'show me all orders with customer names',
+    mode: 'dual',  // Enable dual output
+    execute: true
+  }
+});
+
+console.log('Filter:', response.filter);
+console.log('SQL:', response.sql);
+console.log('Requires SQL:', response.requiresSQL);
+```
+
+### SQL Terminal
+
+For more advanced SQL operations, use the SQL Terminal:
+- See [SQL_TERMINAL_FEATURE.md](./SQL_TERMINAL_FEATURE.md)
+
+### When to Use Which Mode
+
+| Use Case | Recommended Mode |
+|----------|------------------|
+| Simple single-collection queries | `filter` |
+| Need both filter and SQL | `dual` |
+| JOINs across collections | `dual` or `sql` |
+| Aggregations (COUNT, SUM) | `sql` |
+| DDL operations | SQL Terminal |
+
 ## Future Enhancements
 
 Potential improvements for future versions:
 
-- Multi-collection queries with joins
-- Aggregation query support (COUNT, SUM, AVG, etc.)
-- Query history and favorites
+- ~~Multi-collection queries with joins~~ ✅ (V2)
+- ~~Aggregation query support (COUNT, SUM, AVG, etc.)~~ ✅ (V2)
+- Query history and favorites ✅ (V2 - SQL Terminal)
 - Custom prompt templates
 - Multi-language support
 - Query suggestions and autocomplete
@@ -463,6 +557,7 @@ For issues, questions, or contributions:
 
 ## Related Documentation
 
+- [SQL Terminal Feature](./SQL_TERMINAL_FEATURE.md) (V2)
 - [PocketBase Filter Syntax](https://pocketbase.io/docs/api-records/#filtering)
 - [PocketBase API Documentation](https://pocketbase.io/docs)
 - [Product Requirements Document](../PocketBase_AI_Query_Assistant_PRD.md)

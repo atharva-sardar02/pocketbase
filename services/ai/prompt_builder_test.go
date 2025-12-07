@@ -122,3 +122,162 @@ func TestBuildSystemPrompt_ArrayOperators(t *testing.T) {
 	assert.Contains(t, prompt, "Use ?~ for any contains (arrays)")
 }
 
+// ============================================================================
+// V2 Dual Output and SQL Terminal Prompt Tests
+// ============================================================================
+
+func TestBuildDualOutputPrompt_IncludesSchema(t *testing.T) {
+	schema := "DATABASE SCHEMA\n===============\nTABLES:\n  orders:\n    total NUMBER\n    status ENUM(pending, completed)"
+	prompt := BuildDualOutputPrompt(schema)
+
+	assert.Contains(t, prompt, "orders:")
+	assert.Contains(t, prompt, "total NUMBER")
+	assert.Contains(t, prompt, "DATABASE SCHEMA")
+}
+
+func TestBuildDualOutputPrompt_IncludesJSONFormat(t *testing.T) {
+	schema := "DATABASE SCHEMA\nTABLES:\n  test"
+	prompt := BuildDualOutputPrompt(schema)
+
+	// Verify JSON output format instructions
+	assert.Contains(t, prompt, `{"filter":`)
+	assert.Contains(t, prompt, `"sql":`)
+	assert.Contains(t, prompt, `"requiresSQL":`)
+}
+
+func TestBuildDualOutputPrompt_IncludesBothSyntax(t *testing.T) {
+	schema := "DATABASE SCHEMA\nTABLES:\n  test"
+	prompt := BuildDualOutputPrompt(schema)
+
+	// Verify PocketBase filter syntax
+	assert.Contains(t, prompt, "POCKETBASE FILTER SYNTAX")
+	assert.Contains(t, prompt, "Use = for exact match")
+
+	// Verify SQL syntax
+	assert.Contains(t, prompt, "SQL SYNTAX")
+	assert.Contains(t, prompt, "SQLite SQL syntax")
+	assert.Contains(t, prompt, "LIKE '%value%'")
+}
+
+func TestBuildDualOutputPrompt_IncludesRequiresSQLGuidance(t *testing.T) {
+	schema := "DATABASE SCHEMA\nTABLES:\n  test"
+	prompt := BuildDualOutputPrompt(schema)
+
+	// Verify guidance on when SQL is required
+	assert.Contains(t, prompt, "WHEN requiresSQL IS TRUE")
+	assert.Contains(t, prompt, "JOINs across multiple tables")
+	assert.Contains(t, prompt, "Aggregate functions")
+	assert.Contains(t, prompt, "GROUP BY")
+	assert.Contains(t, prompt, "Subqueries")
+}
+
+func TestBuildDualOutputPrompt_IncludesExamples(t *testing.T) {
+	schema := "DATABASE SCHEMA\nTABLES:\n  test"
+	prompt := BuildDualOutputPrompt(schema)
+
+	// Verify both simple and complex examples
+	assert.Contains(t, prompt, "active users")
+	assert.Contains(t, prompt, "count of orders by customer")
+	assert.Contains(t, prompt, "orders with customer names")
+	assert.Contains(t, prompt, "JOIN")
+	assert.Contains(t, prompt, "GROUP BY")
+}
+
+func TestBuildSQLTerminalPrompt_IncludesSchema(t *testing.T) {
+	schema := "DATABASE SCHEMA\n===============\nTABLES:\n  products:\n    name TEXT\n    price NUMBER"
+	prompt := BuildSQLTerminalPrompt(schema)
+
+	assert.Contains(t, prompt, "products:")
+	assert.Contains(t, prompt, "name TEXT")
+	assert.Contains(t, prompt, "price NUMBER")
+}
+
+func TestBuildSQLTerminalPrompt_IncludesSQLCapabilities(t *testing.T) {
+	schema := "DATABASE SCHEMA\nTABLES:\n  test"
+	prompt := BuildSQLTerminalPrompt(schema)
+
+	// Verify SQL capabilities
+	assert.Contains(t, prompt, "SQL CAPABILITIES")
+	assert.Contains(t, prompt, "SELECT")
+	assert.Contains(t, prompt, "INSERT")
+	assert.Contains(t, prompt, "UPDATE")
+	assert.Contains(t, prompt, "DELETE")
+	assert.Contains(t, prompt, "CREATE TABLE")
+	assert.Contains(t, prompt, "ALTER TABLE")
+	assert.Contains(t, prompt, "DROP TABLE")
+}
+
+func TestBuildSQLTerminalPrompt_IncludesTableStructure(t *testing.T) {
+	schema := "DATABASE SCHEMA\nTABLES:\n  test"
+	prompt := BuildSQLTerminalPrompt(schema)
+
+	// Verify table structure info
+	assert.Contains(t, prompt, "TABLE STRUCTURE")
+	assert.Contains(t, prompt, "id (TEXT PRIMARY KEY)")
+	assert.Contains(t, prompt, "created (DATETIME)")
+	assert.Contains(t, prompt, "updated (DATETIME)")
+}
+
+func TestBuildSQLTerminalPrompt_IncludesJoinSyntax(t *testing.T) {
+	schema := "DATABASE SCHEMA\nTABLES:\n  test"
+	prompt := BuildSQLTerminalPrompt(schema)
+
+	// Verify JOIN syntax
+	assert.Contains(t, prompt, "JOIN SYNTAX")
+	assert.Contains(t, prompt, "table.field")
+}
+
+func TestBuildSQLTerminalPrompt_IncludesExamples(t *testing.T) {
+	schema := "DATABASE SCHEMA\nTABLES:\n  test"
+	prompt := BuildSQLTerminalPrompt(schema)
+
+	// Verify various SQL examples
+	assert.Contains(t, prompt, "SELECT * FROM")
+	assert.Contains(t, prompt, "datetime('now'")
+	assert.Contains(t, prompt, "COUNT(*)")
+	assert.Contains(t, prompt, "SUM(")
+	assert.Contains(t, prompt, "strftime(")
+	assert.Contains(t, prompt, "CREATE TABLE")
+	assert.Contains(t, prompt, "INSERT INTO")
+	assert.Contains(t, prompt, "UPDATE")
+	assert.Contains(t, prompt, "DELETE FROM")
+}
+
+func TestBuildPromptForMode_Filter(t *testing.T) {
+	schema := "Collection: test\nFields:\n  name (text)"
+	prompt := BuildPromptForMode(schema, PromptModeFilter)
+
+	// Should use the basic filter template
+	assert.Contains(t, prompt, "PocketBase filter query generator")
+	assert.Contains(t, prompt, "FILTER SYNTAX RULES")
+	assert.NotContains(t, prompt, "SQL SYNTAX")
+}
+
+func TestBuildPromptForMode_Dual(t *testing.T) {
+	schema := "DATABASE SCHEMA\nTABLES:\n  test"
+	prompt := BuildPromptForMode(schema, PromptModeDual)
+
+	// Should use the dual output template
+	assert.Contains(t, prompt, "POCKETBASE FILTER SYNTAX")
+	assert.Contains(t, prompt, "SQL SYNTAX")
+	assert.Contains(t, prompt, `"requiresSQL"`)
+}
+
+func TestBuildPromptForMode_SQL(t *testing.T) {
+	schema := "DATABASE SCHEMA\nTABLES:\n  test"
+	prompt := BuildPromptForMode(schema, PromptModeSQL)
+
+	// Should use the SQL terminal template
+	assert.Contains(t, prompt, "SQL query generator")
+	assert.Contains(t, prompt, "SQL CAPABILITIES")
+	assert.Contains(t, prompt, "CREATE TABLE")
+}
+
+func TestBuildPromptForMode_DefaultToFilter(t *testing.T) {
+	schema := "Collection: test\nFields:\n  name (text)"
+	prompt := BuildPromptForMode(schema, "unknown")
+
+	// Should default to filter mode
+	assert.Contains(t, prompt, "PocketBase filter query generator")
+}
+
