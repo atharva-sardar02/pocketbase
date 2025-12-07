@@ -1,0 +1,16 @@
+// Import Wizard Styles
+
+.import-wizard {
+    // Additional global styles for import wizard if needed
+}
+
+// Shared loading spinner
+.import-spinner {
+    display: inline-block;
+    animation: importSpin 1s linear infinite;
+}
+
+@keyframes importSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

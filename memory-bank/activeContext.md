@@ -2,123 +2,186 @@
 
 ## Current Work Focus
 
-**Phase:** V2 Complete + All Enhancements  
-**Status:** V1 ✅ Complete, V2 ✅ Complete + Enhanced + Ready to Merge  
-**Branch:** `feat/v2-multi-table-sql`  
-**Next Step:** Commit all changes and merge to main/master
+**Phase:** V3 Complete — Dashboard & Data Import  
+**Status:** ✅ V1 Complete, ✅ V2 Complete + Merged, ✅ V3 Code Complete (pending commit)  
+**Branch:** `feat/v3-dashboard-import` (created from master)  
+**Last V2 Commit:** `d2c28c90` - V2: SQL Terminal with multi-statement and multi-row INSERT support
 
-## Session Summary - All Features Complete
+## V3 Progress Summary
 
-### New Features Added This Session
-1. ✅ **Multi-Statement SQL Execution** - Run multiple SQL commands separated by `;`
-2. ✅ **Multi-Results Display** - Each statement shows its own results table
-3. ✅ **Generated SQL Wrapping** - Long SQL queries wrap nicely
-4. ✅ **Multi-Row INSERT Support** - INSERT with multiple VALUES rows now works
-5. ✅ **"See in Collection" Button** - Navigate to collection with filter applied (SPA navigation)
+### PR #18: Metrics Backend API ✅ COMPLETE
+- Created `apis/metrics.go` with 6 endpoints
+- Created `apis/metrics_test.go` with 17 test cases (all pass)
+- Registered routes in `apis/base.go`
 
-### Bug Fixes Applied This Session
-1. ✅ AI Query Results Clearing - Old results clear when new AI query returns empty
-2. ✅ Table Header Sticky Scroll - Column headers stay fixed while scrolling
-3. ✅ Generated SQL Box Overflow - SQL no longer gets cut off
-4. ✅ Multi-Row INSERT Parsing - Parser now handles `INSERT ... VALUES (...), (...), (...)`
+**Endpoints Implemented:**
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/metrics/overview` | Total requests, avg latency, error rate, DB size |
+| `GET /api/metrics/requests` | Time-series requests per minute |
+| `GET /api/metrics/latency` | Avg/p50/p95/p99 latency percentiles |
+| `GET /api/metrics/errors` | 4xx/5xx error counts over time |
+| `GET /api/metrics/endpoints` | Top 10 endpoints by request count |
+| `GET /api/metrics/collections` | Record counts per collection |
 
-## Key Implementation Details
+### PR #19: Dashboard UI ✅ COMPLETE & TESTED
+- Created `ui/src/stores/dashboard.js` - state management
+- Created `ui/src/components/dashboard/`:
+  - `MetricCard.svelte` - stat card with icon
+  - `RequestsChart.svelte` - line chart (Chart.js)
+  - `LatencyChart.svelte` - multi-line percentile chart
+  - `EndpointsChart.svelte` - horizontal bar chart
+  - `CollectionsTable.svelte` - record counts table
+- Created `ui/src/pages/Dashboard.svelte` - main page
+- Created `ui/src/scss/_dashboard.scss` - styles
+- Updated `ui/src/routes.js` - added `/dashboard` route
+- Updated `ui/src/App.svelte` - added sidebar entry
 
-### Multi-Statement SQL (`services/sql/executor.go`)
-```go
-SplitStatements(sql string) []string           // Splits SQL by ; (handles strings)
-ExecuteMultiple(ctx, sql) (*MultiExecutionResult, error)  // Runs all statements
+**Enhancements Added:**
+1. Dynamic intervals based on period selection:
+| Period | Interval | Data Points |
+|--------|----------|-------------|
+| 1h | 5m | ~12 points |
+| 6h | 15m | ~24 points |
+| 24h | 1h | 24 points |
+| 7d | 6h | ~28 points |
+
+2. Responsive layout fix for charts (prevents cutoff on zoom):
+   - Added `min-width: 0` to dashboard and chart cards
+   - Added `overflow: hidden` to chart cards
+   - Improved flex-wrap behavior for header
+
+### PR #20: Import Backend API ✅ COMPLETE
+- Created `apis/import.go` with 3 endpoints
+- Created `apis/import_test.go` with 17 test cases (all pass)
+- Registered routes in `apis/base.go`
+
+**Endpoints Implemented:**
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/import/preview` | Parse CSV/JSON, return headers + sample rows |
+| `POST /api/import/validate` | Validate field mapping against collection schema |
+| `POST /api/import/execute` | Perform bulk import with success/failure tracking |
+
+### PR #21: Import Wizard UI ✅ COMPLETE & TESTED
+- Created `ui/src/pages/ImportWizard.svelte` - 4-step wizard page
+- Created `ui/src/components/import/`:
+  - `FileUpload.svelte` - Drag-drop file zone
+  - `DataPreview.svelte` - Preview table with row counts
+  - `FieldMapper.svelte` - Column mapping UI with auto-detect
+  - `ImportProgress.svelte` - Progress + error display
+- Created `ui/src/stores/import.js` - state management
+- Created `ui/src/scss/_import.scss` - styles
+- Updated `ui/src/routes.js` - added `/import` route
+- Updated `ui/src/App.svelte` - added sidebar entry
+
+**Tested:** CSV import works perfectly, JSON import works perfectly
+
+### PR #22: V3 Documentation ✅ COMPLETE
+- Created `docs/DASHBOARD_FEATURE.md` - full dashboard documentation
+- Created `docs/IMPORT_FEATURE.md` - full import wizard documentation
+- Updated `README.md` - added V3 features section
+- Updated `CHANGELOG.md` - added V3 changelog entry
+
+### Bug Fix: Multi-Statement AI SQL Execution ✅ FIXED
+**Issue:** When AI generates multiple SQL statements (e.g., CREATE TABLE + INSERT), only the first statement was being parsed/executed.
+
+**Root Cause:** The `sqlAI` endpoint in `apis/sql_terminal.go` used single-statement execution (`sql.ParseSQL()` + `executor.Execute()`) instead of the multi-statement path.
+
+**Solution:**
+- Backend: Modified `sqlAI()` to use `sql.SplitStatements()` and `executor.ExecuteMultiple()` for multi-statement SQL
+- Frontend: Updated `executeAI()` in `SQLTerminal.svelte` to handle multi-statement responses (isMulti, results array)
+- Added schema auto-refresh after DDL operations in AI mode
+
+**Files Modified:**
+- `apis/sql_terminal.go` - Multi-statement support in `sqlAI()` function
+- `ui/src/pages/SQLTerminal.svelte` - Multi-statement handling in `executeAI()` function
+
+## Files Modified in This Session
+
+### Documentation (PR #22):
+```
+docs/DASHBOARD_FEATURE.md    # NEW - Dashboard feature docs
+docs/IMPORT_FEATURE.md       # NEW - Import wizard docs
+README.md                    # MODIFIED - added V3 features
+CHANGELOG.md                 # MODIFIED - added V3 changelog
 ```
 
-### Multi-Row INSERT (`services/sql/parser.go`)
-```go
-MultiValues []map[string]any  // New field in SQLStatement struct
-parseMultipleValueRows()      // Parses (v1,v2), (v3,v4) rows
+### Backend (PR #18):
+```
+apis/metrics.go          # NEW - 6 metrics endpoints
+apis/metrics_test.go     # NEW - 17 test cases  
+apis/base.go             # MODIFIED - registered bindMetricsApi
 ```
 
-### "See in Collection" (`ui/src/components/ai/`)
-- `AIFilterDisplay.svelte` - Uses `push()` for SPA navigation
-- `AIQueryPanel.svelte` - Added button below filter code block
-- Navigates to `/collections?collection=ID&filter=ENCODED_FILTER`
-
-## V2 Implementation Status - COMPLETE
-
-### All PRs + Enhancements ✅
-- ✅ PR #10: Multi-Collection Schema Extraction
-- ✅ PR #11: Dual Output Backend (Filter + SQL)
-- ✅ PR #12: Editable Query UI with Tabs
-- ✅ PR #13: SQL Parser & Type Mapper
-- ✅ PR #14: SQL Executor (PocketBase API Integration)
-- ✅ PR #15: SQL Terminal API Endpoints
-- ✅ PR #16: SQL Terminal UI
-- ✅ PR #17: V2 Documentation
-- ✅ Enhancement: Multi-Statement SQL Execution
-- ✅ Enhancement: Multi-Row INSERT Support
-- ✅ Enhancement: "See in Collection" SPA Navigation
-
-## All Bug Fixes Summary
-
-| # | Issue | File | Fix |
-|---|-------|------|-----|
-| 1 | CREATE TABLE multi-line parsing | `parser.go` | `(?s)` regex flag |
-| 2 | System collection SELECT blocked | `executor.go` | Allow SELECT on `_` tables |
-| 3 | AI results nested format | `SQLTerminal.svelte` | `data.result \|\| data` |
-| 4 | First column cut off | `ResultsTable.svelte` | Fixed overflow/scroll |
-| 5 | Generated SQL truncated | `SQLTerminal.svelte` | `white-space: pre-wrap` |
-| 6 | AI results not clearing | `SQLTerminal.svelte` | Clear stores on new query |
-| 7 | Multi-table sticky headers | `SQLTerminal.svelte` | `border-collapse: separate` |
-| 8 | Multi-row INSERT failing | `parser.go`, `executor.go` | Added MultiValues support |
-
-## Files Modified This Session
-
-### Backend
-- `services/sql/parser.go` - Multi-row INSERT parsing
-- `services/sql/executor.go` - Multi-statement + multi-row INSERT execution
-- `apis/sql_terminal.go` - Multi-statement API response
-
-### Frontend
-- `ui/src/pages/SQLTerminal.svelte` - Multi-results UI, CSS fixes
-- `ui/src/stores/sql.js` - Multi-statement stores
-- `ui/src/components/ai/AIFilterDisplay.svelte` - SPA "See in Collection"
-- `ui/src/components/ai/AIQueryPanel.svelte` - "See in Collection" button
-
-## Git Commands for Next Session
-
-```powershell
-cd d:\gauntlet-ai\pocket-base-ai
-
-# Check status
-git status
-
-# Stage all changes
-git add -A
-
-# Commit
-git commit -m "V2: SQL Terminal with multi-statement and multi-row INSERT support
-
-Features:
-- Multi-statement SQL execution (separated by ;)
-- Multi-row INSERT (VALUES with multiple rows)
-- Individual results display for each statement
-- 'See in Collection' button with SPA navigation
-- AI and direct SQL modes
-- Schema explorer with field browser
-
-Bug Fixes:
-- Multi-line CREATE TABLE parsing
-- System collection SELECT allowed
-- AI results display and clearing
-- Table column visibility and scrolling
-- Generated SQL box overflow"
-
-# Switch to main and merge
-git checkout main
-git merge feat/v2-multi-table-sql
-git push
+### Backend (PR #20):
+```
+apis/import.go           # NEW - 3 import endpoints
+apis/import_test.go      # NEW - 17 test cases
+apis/base.go             # MODIFIED - registered bindImportApi
 ```
 
-## Access Points
+### Frontend (PR #19):
+```
+ui/src/stores/dashboard.js                         # NEW
+ui/src/components/dashboard/MetricCard.svelte      # NEW
+ui/src/components/dashboard/RequestsChart.svelte   # NEW
+ui/src/components/dashboard/LatencyChart.svelte    # NEW
+ui/src/components/dashboard/EndpointsChart.svelte  # NEW
+ui/src/components/dashboard/CollectionsTable.svelte # NEW
+ui/src/pages/Dashboard.svelte                      # NEW (with dynamic intervals fix)
+ui/src/scss/_dashboard.scss                        # NEW
+ui/src/scss/main.scss                              # MODIFIED - added dashboard import
+ui/src/routes.js                                   # MODIFIED - added /dashboard route
+ui/src/App.svelte                                  # MODIFIED - added sidebar entry
+```
 
-- **AI Query:** `/ai-query` (sidebar robot icon)
-- **SQL Terminal:** `/sql-terminal` (sidebar terminal icon)
-- **Settings:** `/settings/ai` (AI configuration)
+### Frontend (PR #21):
+```
+ui/src/stores/import.js                            # NEW
+ui/src/components/import/FileUpload.svelte         # NEW
+ui/src/components/import/DataPreview.svelte        # NEW
+ui/src/components/import/FieldMapper.svelte        # NEW
+ui/src/components/import/ImportProgress.svelte     # NEW
+ui/src/pages/ImportWizard.svelte                   # NEW
+ui/src/scss/_import.scss                           # NEW
+ui/src/scss/main.scss                              # MODIFIED - added import scss
+ui/src/routes.js                                   # MODIFIED - added /import route
+ui/src/App.svelte                                  # MODIFIED - added sidebar entry
+```
+
+### Bug Fix (Multi-Statement AI SQL):
+```
+apis/sql_terminal.go                               # MODIFIED - multi-statement support in sqlAI()
+ui/src/pages/SQLTerminal.svelte                    # MODIFIED - multi-statement handling in executeAI()
+```
+
+## Next Steps
+
+1. ~~PR #18: Metrics Backend API~~ ✅ DONE
+2. ~~PR #19: Dashboard UI~~ ✅ DONE & TESTED
+3. ~~PR #20: Import Backend API~~ ✅ DONE
+4. ~~PR #21: Import Wizard UI~~ ✅ DONE & TESTED
+5. ~~PR #22: Documentation~~ ✅ DONE
+6. ~~Build UI (`npm run build`)~~ ✅ DONE
+7. ~~Rebuild Go binary~~ ✅ DONE
+8. ~~Test all features end-to-end~~ ✅ DONE
+9. ~~Rebuild UI with dynamic intervals fix~~ ✅ DONE & TESTED
+10. ~~Responsive layout fix for charts~~ ✅ DONE
+11. ~~Bug Fix: Multi-statement AI SQL execution~~ ✅ FIXED
+12. **Rebuild UI** (`npm run build`) ← NEXT
+13. **Rebuild Go binary** (`go build`)
+14. **Test multi-statement AI SQL**
+15. **Commit all V3 changes**
+16. Push to remote
+
+## Technical Notes
+
+- Dashboard uses Chart.js (already in codebase via LogsChart)
+- Metrics API queries `_logs` table using `json_extract()` for data fields
+- Database size via SQLite PRAGMA: `page_count * page_size`
+- All metrics endpoints require superuser auth
+- Auto-refresh every 30 seconds (configurable)
+- Dynamic intervals: 1h→5m, 6h→15m, 24h→1h, 7d→6h
+- Import supports both CSV and JSON formats
+- Import uses field mapping with auto-detection

@@ -11,6 +11,8 @@ import PageStorage from "@/components/settings/PageStorage.svelte";
 import PageSuperuserLogin from "@/components/superusers/PageSuperuserLogin.svelte";
 import AIQueryPanel from "@/components/ai/AIQueryPanel.svelte";
 import SQLTerminal from "@/pages/SQLTerminal.svelte";
+import Dashboard from "@/pages/Dashboard.svelte";
+import ImportWizard from "@/pages/ImportWizard.svelte";
 import PageAI from "@/pages/settings/AI.svelte";
 import ApiClient from "@/utils/ApiClient";
 import { isTokenExpired } from "pocketbase";
@@ -63,6 +65,18 @@ const routes = {
 
     "/sql-terminal": wrap({
         component: SQLTerminal,
+        conditions: [(_) => ApiClient.authStore.isValid],
+        userData: { showAppSidebar: true },
+    }),
+
+    "/dashboard": wrap({
+        component: Dashboard,
+        conditions: [(_) => ApiClient.authStore.isValid],
+        userData: { showAppSidebar: true },
+    }),
+
+    "/import": wrap({
+        component: ImportWizard,
         conditions: [(_) => ApiClient.authStore.isValid],
         userData: { showAppSidebar: true },
     }),

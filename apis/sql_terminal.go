@@ -273,13 +273,22 @@ func sqlAI(e *core.RequestEvent) error {
 	// Clean the generated SQL
 	generatedSQL = cleanSQLResponse(generatedSQL)
 
-	// Parse to check if destructive
-	stmt, parseErr := sql.ParseSQL(generatedSQL)
+	// Split into multiple statements to support multi-statement SQL
+	statements := sql.SplitStatements(generatedSQL)
+	
+	// Check for destructive operations in any statement
 	isDestructive := false
 	requiresConfirm := false
-	if parseErr == nil {
-		isDestructive = stmt.IsDestructive()
-		requiresConfirm = stmt.RequiresConfirmation()
+	for _, stmtStr := range statements {
+		stmt, parseErr := sql.ParseSQL(stmtStr)
+		if parseErr == nil {
+			if stmt.IsDestructive() {
+				isDestructive = true
+			}
+			if stmt.RequiresConfirmation() {
+				requiresConfirm = true
+			}
+		}
 	}
 
 	response := SQLAIResponse{
@@ -291,58 +300,157 @@ func sqlAI(e *core.RequestEvent) error {
 
 	// Optionally execute the generated SQL
 	if req.Execute {
-		// Check confirmation for destructive operations
-		if requiresConfirm && !req.Confirm {
-			response.Result = &SQLExecuteResponse{
-				Success: false,
-				Type:    string(stmt.Type),
-				Message: "This operation requires confirmation. Set 'confirm: true' to proceed.",
-				Error:   "confirmation_required",
-			}
-			return e.JSON(http.StatusOK, response)
-		}
-
-		// Validate statement
-		if parseErr != nil {
-			response.Result = &SQLExecuteResponse{
-				Success: false,
-				Message: "Invalid SQL syntax.",
-				Error:   parseErr.Error(),
-			}
-			return e.JSON(http.StatusOK, response)
-		}
-
-		if err := sql.ValidateStatement(stmt); err != nil {
-			response.Result = &SQLExecuteResponse{
-				Success: false,
-				Message: err.Error(),
-				Error:   "validation_failed",
-			}
-			return e.JSON(http.StatusOK, response)
-		}
-
-		// Execute the SQL
 		executor := sql.NewExecutor(e.App)
-		result, execErr := executor.Execute(ctx, generatedSQL)
-		if execErr != nil {
-			response.Result = &SQLExecuteResponse{
-				Success: false,
-				Message: "SQL execution failed.",
-				Error:   execErr.Error(),
-			}
-			return e.JSON(http.StatusOK, response)
-		}
 
-		response.Executed = true
-		response.Result = &SQLExecuteResponse{
-			Success:      result.Success,
-			Type:         string(result.Type),
-			Message:      result.Message,
-			Columns:      result.Columns,
-			Rows:         result.Rows,
-			TotalRows:    result.TotalRows,
-			RowsAffected: result.RowsAffected,
-			ExecutionMs:  result.ExecutionMs,
+		// Handle single statement
+		if len(statements) == 1 {
+			stmt, parseErr := sql.ParseSQL(statements[0])
+			
+			// Check confirmation for destructive operations
+			if parseErr == nil && stmt.RequiresConfirmation() && !req.Confirm {
+				response.Result = &SQLExecuteResponse{
+					Success: false,
+					Type:    string(stmt.Type),
+					Message: "This operation requires confirmation. Set 'confirm: true' to proceed.",
+					Error:   "confirmation_required",
+				}
+				return e.JSON(http.StatusOK, response)
+			}
+
+			// Validate statement
+			if parseErr != nil {
+				response.Result = &SQLExecuteResponse{
+					Success: false,
+					Message: "Invalid SQL syntax.",
+					Error:   parseErr.Error(),
+				}
+				return e.JSON(http.StatusOK, response)
+			}
+
+			if err := sql.ValidateStatement(stmt); err != nil {
+				response.Result = &SQLExecuteResponse{
+					Success: false,
+					Message: err.Error(),
+					Error:   "validation_failed",
+				}
+				return e.JSON(http.StatusOK, response)
+			}
+
+			// Execute the SQL
+			result, execErr := executor.Execute(ctx, statements[0])
+			if execErr != nil {
+				response.Result = &SQLExecuteResponse{
+					Success: false,
+					Message: "SQL execution failed.",
+					Error:   execErr.Error(),
+				}
+				return e.JSON(http.StatusOK, response)
+			}
+
+			response.Executed = true
+			response.Result = &SQLExecuteResponse{
+				Success:      result.Success,
+				Type:         string(result.Type),
+				Message:      result.Message,
+				Columns:      result.Columns,
+				Rows:         result.Rows,
+				TotalRows:    result.TotalRows,
+				RowsAffected: result.RowsAffected,
+				ExecutionMs:  result.ExecutionMs,
+			}
+		} else {
+			// Handle multiple statements
+			// First, validate all statements and check for confirmation requirements
+			needsConfirm := false
+			for _, stmtStr := range statements {
+				stmt, parseErr := sql.ParseSQL(stmtStr)
+				if parseErr != nil {
+					response.Result = &SQLExecuteResponse{
+						Success: false,
+						Message: "Invalid SQL syntax in statement: " + stmtStr,
+						Error:   parseErr.Error(),
+					}
+					return e.JSON(http.StatusOK, response)
+				}
+				if err := sql.ValidateStatement(stmt); err != nil {
+					response.Result = &SQLExecuteResponse{
+						Success: false,
+						Message: err.Error(),
+						Error:   "validation_failed",
+					}
+					return e.JSON(http.StatusOK, response)
+				}
+				if stmt.RequiresConfirmation() {
+					needsConfirm = true
+				}
+			}
+
+			if needsConfirm && !req.Confirm {
+				response.Result = &SQLExecuteResponse{
+					Success:         false,
+					IsMulti:         true,
+					TotalStatements: len(statements),
+					Message:         "One or more statements require confirmation. Set 'confirm: true' to proceed.",
+					Error:           "confirmation_required",
+				}
+				return e.JSON(http.StatusOK, response)
+			}
+
+			// Execute all statements
+			multiResult, execErr := executor.ExecuteMultiple(ctx, generatedSQL)
+			if execErr != nil {
+				response.Result = &SQLExecuteResponse{
+					Success: false,
+					Message: "SQL execution failed.",
+					Error:   execErr.Error(),
+				}
+				return e.JSON(http.StatusOK, response)
+			}
+
+			// Convert results to response format
+			var results []*SQLExecuteResponse
+			var lastSelectResult *sql.ExecutionResult
+			var totalRowsAffected int64
+
+			for _, r := range multiResult.Results {
+				resp := &SQLExecuteResponse{
+					Success:      r.Success,
+					Type:         string(r.Type),
+					Message:      r.Message,
+					Columns:      r.Columns,
+					Rows:         r.Rows,
+					TotalRows:    r.TotalRows,
+					RowsAffected: r.RowsAffected,
+					ExecutionMs:  r.ExecutionMs,
+				}
+				results = append(results, resp)
+				totalRowsAffected += r.RowsAffected
+
+				// Track last SELECT for displaying results
+				if r.Type == sql.StatementSelect && len(r.Rows) > 0 {
+					lastSelectResult = r
+				}
+			}
+
+			response.Executed = true
+			response.Result = &SQLExecuteResponse{
+				Success:         multiResult.Failed == 0,
+				IsMulti:         true,
+				TotalStatements: multiResult.TotalStatements,
+				SuccessfulCount: multiResult.Successful,
+				FailedCount:     multiResult.Failed,
+				Message:         generateMultiMessage(multiResult),
+				RowsAffected:    totalRowsAffected,
+				ExecutionMs:     multiResult.TotalMs,
+				Results:         results,
+			}
+
+			// If there was a SELECT, include its results at the top level for easy display
+			if lastSelectResult != nil {
+				response.Result.Columns = lastSelectResult.Columns
+				response.Result.Rows = lastSelectResult.Rows
+				response.Result.TotalRows = lastSelectResult.TotalRows
+			}
 		}
 	}
 

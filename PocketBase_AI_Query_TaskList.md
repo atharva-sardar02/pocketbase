@@ -4,7 +4,7 @@
 
 **Repository:** Fork of https://github.com/pocketbase/pocketbase  
 **Feature:** AI-powered natural language query assistant  
-**Total PRs:** 17 (V1: 9 ✅ Complete, V2: 8 🚧 Planned)
+**Total PRs:** 22 (V1: 9 ✅, V2: 8 ✅, V3: 5 🚧)
 
 ---
 
@@ -13,7 +13,8 @@
 | Version | PRs | Status | Features |
 |---------|-----|--------|----------|
 | V1 | #1-9 | ✅ Complete | Single-collection AI Query, Filter generation, Settings UI |
-| V2 | #10-17 | 🚧 Planned | Multi-table queries, Dual output, SQL Terminal |  
+| V2 | #10-17 | ✅ Complete | Multi-table queries, Dual output, SQL Terminal |
+| V3 | #18-22 | 🚧 In Progress | Real-time Metrics Dashboard, Data Import Wizard |  
 
 ---
 
@@ -59,41 +60,71 @@ pocketbase/                          # Forked repository root
     └── AI_QUERY_FEATURE.md          # ✅ Feature documentation
 ```
 
-### V2 Files (🚧 Planned)
+### V2 Files (✅ Complete)
 
 ```
 pocketbase/
 ├── apis/
-│   └── sql_terminal.go              # NEW — SQL Terminal API endpoints
-│   └── sql_terminal_test.go         # NEW — SQL Terminal tests
+│   └── sql_terminal.go              # ✅ SQL Terminal API endpoints
 ├── services/
 │   ├── ai/
-│   │   ├── schema_extractor.go      # MODIFY — Extract ALL collections + relationships
-│   │   └── prompt_template.go       # MODIFY — Add SQL syntax rules
-│   └── sql/                         # NEW DIRECTORY
-│       ├── parser.go                # NEW — SQL statement parser
-│       ├── parser_test.go           # NEW — Parser tests
-│       ├── executor.go              # NEW — SQL execution via PocketBase APIs
-│       ├── executor_test.go         # NEW — Executor tests
-│       ├── mapper.go                # NEW — SQL type → PocketBase field mapper
-│       └── mapper_test.go           # NEW — Mapper tests
+│   │   ├── schema_extractor.go      # ✅ Extract ALL collections + relationships
+│   │   └── prompt_template.go       # ✅ Add SQL syntax rules
+│   └── sql/                         # ✅ COMPLETE
+│       ├── parser.go                # ✅ SQL statement parser
+│       ├── executor.go              # ✅ SQL execution via PocketBase APIs
+│       └── mapper.go                # ✅ SQL type → PocketBase field mapper
 ├── ui/src/
 │   ├── components/ai/
-│   │   ├── AIQueryPanel.svelte      # MODIFY — Add dual output tabs
-│   │   ├── QueryTabs.svelte         # NEW — Filter/SQL tab switcher
-│   │   └── EditableCodeBlock.svelte # NEW — Editable query with syntax highlight
-│   ├── components/sql/              # NEW DIRECTORY
-│   │   ├── SQLEditor.svelte         # NEW — Code editor component
-│   │   ├── SchemaExplorer.svelte    # NEW — Collections sidebar browser
-│   │   ├── ResultsTable.svelte      # NEW — Dynamic results display
-│   │   └── QueryHistory.svelte      # NEW — Command history dropdown
+│   │   ├── AIQueryPanel.svelte      # ✅ Dual output tabs
+│   │   ├── QueryTabs.svelte         # ✅ Filter/SQL tab switcher
+│   │   └── EditableCodeBlock.svelte # ✅ Editable query with syntax highlight
+│   ├── components/sql/              # ✅ COMPLETE
+│   │   ├── SQLEditor.svelte         # ✅ Code editor component
+│   │   ├── SchemaExplorer.svelte    # ✅ Collections sidebar browser
+│   │   ├── ResultsTable.svelte      # ✅ Dynamic results display
+│   │   └── QueryHistory.svelte      # ✅ Command history dropdown
 │   ├── pages/
-│   │   └── SQLTerminal.svelte       # NEW — Main SQL Terminal page
+│   │   └── SQLTerminal.svelte       # ✅ Main SQL Terminal page
 │   ├── stores/
-│   │   └── sql.js                   # NEW — SQL terminal state
-│   └── App.svelte                   # MODIFY — Add SQL Terminal to sidebar
+│   │   └── sql.js                   # ✅ SQL terminal state
+│   └── App.svelte                   # ✅ SQL Terminal in sidebar
 └── docs/
-    └── SQL_TERMINAL_FEATURE.md      # NEW — SQL Terminal documentation
+    └── SQL_TERMINAL_FEATURE.md      # ✅ SQL Terminal documentation
+```
+
+### V3 Files (🚧 Planned)
+
+```
+pocketbase/
+├── apis/
+│   ├── metrics.go                   # NEW — Dashboard metrics API endpoints
+│   └── import.go                    # NEW — Data import API endpoints
+├── ui/src/
+│   ├── pages/
+│   │   ├── Dashboard.svelte         # NEW — Metrics dashboard page
+│   │   └── ImportWizard.svelte      # NEW — Data import wizard page
+│   ├── components/
+│   │   ├── dashboard/               # NEW DIRECTORY
+│   │   │   ├── MetricCard.svelte    # NEW — Stat card with icon
+│   │   │   ├── RequestsChart.svelte # NEW — Time-series line chart
+│   │   │   ├── LatencyChart.svelte  # NEW — Multi-line percentile chart
+│   │   │   ├── EndpointsChart.svelte# NEW — Horizontal bar chart
+│   │   │   └── CollectionsTable.svelte # NEW — Record counts table
+│   │   └── import/                  # NEW DIRECTORY
+│   │       ├── FileUpload.svelte    # NEW — Drag-drop file zone
+│   │       ├── DataPreview.svelte   # NEW — Preview table
+│   │       ├── FieldMapper.svelte   # NEW — Column mapping UI
+│   │       └── ImportProgress.svelte# NEW — Progress + errors
+│   ├── stores/
+│   │   ├── dashboard.js             # NEW — Dashboard state management
+│   │   └── import.js                # NEW — Import wizard state
+│   └── scss/
+│       ├── _dashboard.scss          # NEW — Dashboard styles
+│       └── _import.scss             # NEW — Import styles
+└── docs/
+    ├── DASHBOARD_FEATURE.md         # NEW — Dashboard documentation
+    └── IMPORT_FEATURE.md            # NEW — Import documentation
 ```
 
 ---
@@ -1151,11 +1182,334 @@ Complete V2 documentation and final testing.
 | `CHANGELOG.md` | MODIFY | Add V2 release notes |
 
 ### Verification
+- [x] All tests pass
+- [x] Documentation is complete
+- [x] Multi-table queries work end-to-end
+- [x] SQL Terminal creates real collections
+- [x] All changes visible in Admin UI
+
+---
+
+# V3 PRs: Real-time Dashboard & Data Import Wizard
+
+---
+
+## PR #18: Metrics Backend API
+
+**Branch:** `feat/metrics-api`  
+**Estimated Time:** 3-4 hours  
+**Dependencies:** V2 Complete (PR #17)  
+
+### Description
+Create backend API endpoints for the metrics dashboard, aggregating data from the existing `_logs` table.
+
+### Tasks
+
+- [ ] **18.1** Create `apis/metrics.go`:
+  - [ ] `GET /api/metrics/overview` — Total requests, avg latency, error rate, DB size
+  - [ ] `GET /api/metrics/requests` — Time-series of requests per minute (last 24h)
+  - [ ] `GET /api/metrics/latency` — Avg/p50/p95/p99 latency over time
+  - [ ] `GET /api/metrics/errors` — Error count by status code over time
+  - [ ] `GET /api/metrics/endpoints` — Top 10 endpoints by request count
+  - [ ] `GET /api/metrics/collections` — Record counts per collection
+- [ ] **18.2** Implement metrics aggregation from `_logs` table:
+  - [ ] Query `data.execTime` for latency metrics
+  - [ ] Query `data.status` for error rate calculation
+  - [ ] Query `data.url` for endpoint statistics
+- [ ] **18.3** Implement database size calculation:
+  - [ ] Use SQLite PRAGMA: `page_count * page_size`
+- [ ] **18.4** Implement collection stats:
+  - [ ] Loop through all collections
+  - [ ] Use `CountRecords()` for each
+- [ ] **18.5** Add authentication (superuser only)
+- [ ] **18.6** Register routes in `apis/base.go`
+- [ ] **18.7** Write unit tests for aggregation functions
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `apis/metrics.go` | CREATE | Metrics API endpoints |
+| `apis/base.go` | MODIFY | Register metrics routes |
+
+### Tests
+> ✅ **Unit Tests Required** — `apis/metrics_test.go`
+
+```go
+func TestMetricsAPI_Overview(t *testing.T)
+func TestMetricsAPI_Requests(t *testing.T)
+func TestMetricsAPI_Latency(t *testing.T)
+func TestMetricsAPI_Errors(t *testing.T)
+func TestMetricsAPI_Endpoints(t *testing.T)
+func TestMetricsAPI_Collections(t *testing.T)
+func TestMetricsAPI_Unauthorized(t *testing.T)
+```
+
+---
+
+## PR #19: Dashboard UI
+
+**Branch:** `feat/dashboard-ui`  
+**Estimated Time:** 4-5 hours  
+**Dependencies:** PR #18  
+
+### Description
+Build the metrics dashboard frontend with Chart.js visualizations.
+
+### Tasks
+
+- [ ] **19.1** Create `ui/src/pages/Dashboard.svelte`:
+  - [ ] Main page layout with grid
+  - [ ] Integration with metrics API
+  - [ ] Auto-refresh every 30 seconds
+  - [ ] Time range selector (1h, 6h, 24h)
+- [ ] **19.2** Create `ui/src/components/dashboard/MetricCard.svelte`:
+  - [ ] Stat card with value, label, icon
+  - [ ] Trend indicator (up/down)
+- [ ] **19.3** Create `ui/src/components/dashboard/RequestsChart.svelte`:
+  - [ ] Line chart using Chart.js (already in PocketBase)
+  - [ ] Requests over time
+- [ ] **19.4** Create `ui/src/components/dashboard/LatencyChart.svelte`:
+  - [ ] Multi-line chart for p50/p95/p99
+  - [ ] Different colors per percentile
+- [ ] **19.5** Create `ui/src/components/dashboard/EndpointsChart.svelte`:
+  - [ ] Horizontal bar chart
+  - [ ] Top 10 endpoints
+- [ ] **19.6** Create `ui/src/components/dashboard/CollectionsTable.svelte`:
+  - [ ] Table with collection name, record count
+  - [ ] Sortable columns
+- [ ] **19.7** Create `ui/src/stores/dashboard.js`:
+  - [ ] Metrics data stores
+  - [ ] Loading state
+  - [ ] Refresh interval
+- [ ] **19.8** Modify `ui/src/App.svelte`:
+  - [ ] Add Dashboard to sidebar with chart icon
+  - [ ] Add route `/dashboard`
+- [ ] **19.9** Create `ui/src/scss/_dashboard.scss`:
+  - [ ] Grid layout styles
+  - [ ] Card styles
+  - [ ] Chart container styles
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `ui/src/pages/Dashboard.svelte` | CREATE | Main dashboard page |
+| `ui/src/components/dashboard/MetricCard.svelte` | CREATE | Stat card component |
+| `ui/src/components/dashboard/RequestsChart.svelte` | CREATE | Requests line chart |
+| `ui/src/components/dashboard/LatencyChart.svelte` | CREATE | Latency chart |
+| `ui/src/components/dashboard/EndpointsChart.svelte` | CREATE | Endpoints bar chart |
+| `ui/src/components/dashboard/CollectionsTable.svelte` | CREATE | Collections table |
+| `ui/src/stores/dashboard.js` | CREATE | Dashboard state |
+| `ui/src/scss/_dashboard.scss` | CREATE | Dashboard styles |
+| `ui/src/App.svelte` | MODIFY | Add sidebar entry |
+| `ui/src/routes.js` | MODIFY | Add dashboard route |
+
+### Tests
+> ❌ **No automated tests** — Manual UI testing
+
+**Manual Test Checklist:**
+- [ ] Dashboard accessible from sidebar
+- [ ] Overview cards show correct data
+- [ ] Requests chart displays time-series
+- [ ] Latency chart shows p50/p95/p99 lines
+- [ ] Top endpoints bar chart renders
+- [ ] Collections table shows record counts
+- [ ] Auto-refresh updates data
+- [ ] Time range selector works
+- [ ] Loading states display correctly
+
+---
+
+## PR #20: Import Backend API
+
+**Branch:** `feat/import-api`  
+**Estimated Time:** 3-4 hours  
+**Dependencies:** V2 Complete (PR #17)  
+
+### Description
+Create backend API endpoints for the data import wizard.
+
+### Tasks
+
+- [ ] **20.1** Create `apis/import.go`:
+  - [ ] `POST /api/import/preview` — Parse file, return headers + sample rows
+  - [ ] `POST /api/import/validate` — Validate mapping against schema
+  - [ ] `POST /api/import/execute` — Perform bulk import
+- [ ] **20.2** Implement CSV parser:
+  - [ ] Handle comma and tab delimiters
+  - [ ] Extract headers from first row
+  - [ ] Parse sample rows (first 5)
+  - [ ] Count total rows
+- [ ] **20.3** Implement JSON parser:
+  - [ ] Handle array of objects
+  - [ ] Extract keys as headers
+  - [ ] Parse sample objects (first 5)
+- [ ] **20.4** Implement field mapping validation:
+  - [ ] Verify target collection exists
+  - [ ] Verify mapped fields exist in schema
+  - [ ] Check type compatibility
+- [ ] **20.5** Implement bulk import execution:
+  - [ ] Iterate through rows
+  - [ ] Create records via PocketBase API
+  - [ ] Track success/failure counts
+  - [ ] Collect error details for failed rows
+- [ ] **20.6** Add authentication (authenticated users)
+- [ ] **20.7** Register routes in `apis/base.go`
+- [ ] **20.8** Write unit tests
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `apis/import.go` | CREATE | Import API endpoints |
+| `apis/base.go` | MODIFY | Register import routes |
+
+### Tests
+> ✅ **Unit Tests Required** — `apis/import_test.go`
+
+```go
+func TestImportAPI_Preview_CSV(t *testing.T)
+func TestImportAPI_Preview_JSON(t *testing.T)
+func TestImportAPI_Validate_Success(t *testing.T)
+func TestImportAPI_Validate_InvalidField(t *testing.T)
+func TestImportAPI_Execute_Success(t *testing.T)
+func TestImportAPI_Execute_PartialFailure(t *testing.T)
+func TestImportAPI_Unauthorized(t *testing.T)
+```
+
+---
+
+## PR #21: Import Wizard UI
+
+**Branch:** `feat/import-ui`  
+**Estimated Time:** 4-5 hours  
+**Dependencies:** PR #20  
+
+### Description
+Build the 4-step data import wizard frontend.
+
+### Tasks
+
+- [ ] **21.1** Create `ui/src/pages/ImportWizard.svelte`:
+  - [ ] 4-step wizard layout
+  - [ ] Step indicator/navigation
+  - [ ] Back/Next/Import buttons
+- [ ] **21.2** Create `ui/src/components/import/FileUpload.svelte`:
+  - [ ] Drag-and-drop zone
+  - [ ] File input fallback
+  - [ ] File type validation (CSV, JSON)
+  - [ ] File size display
+- [ ] **21.3** Create `ui/src/components/import/DataPreview.svelte`:
+  - [ ] Preview table with headers
+  - [ ] First 5 rows of data
+  - [ ] Total row count
+- [ ] **21.4** Create `ui/src/components/import/FieldMapper.svelte`:
+  - [ ] Two-column mapping UI
+  - [ ] Dropdown for target field selection
+  - [ ] Skip option for unwanted columns
+  - [ ] Auto-detect button
+  - [ ] Required field indicators
+- [ ] **21.5** Create `ui/src/components/import/ImportProgress.svelte`:
+  - [ ] Progress bar
+  - [ ] Success/failure counts
+  - [ ] Error log expandable section
+  - [ ] Retry button for failed rows
+- [ ] **21.6** Create `ui/src/stores/import.js`:
+  - [ ] Current step
+  - [ ] Selected collection
+  - [ ] Uploaded file data
+  - [ ] Field mapping
+  - [ ] Import progress
+  - [ ] Errors list
+- [ ] **21.7** Modify `ui/src/App.svelte`:
+  - [ ] Add Import to sidebar with upload icon
+  - [ ] Add route `/import`
+- [ ] **21.8** Create `ui/src/scss/_import.scss`:
+  - [ ] Wizard step styles
+  - [ ] Drop zone styles
+  - [ ] Progress bar styles
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `ui/src/pages/ImportWizard.svelte` | CREATE | Main wizard page |
+| `ui/src/components/import/FileUpload.svelte` | CREATE | File upload component |
+| `ui/src/components/import/DataPreview.svelte` | CREATE | Data preview table |
+| `ui/src/components/import/FieldMapper.svelte` | CREATE | Field mapping UI |
+| `ui/src/components/import/ImportProgress.svelte` | CREATE | Progress display |
+| `ui/src/stores/import.js` | CREATE | Import state |
+| `ui/src/scss/_import.scss` | CREATE | Import styles |
+| `ui/src/App.svelte` | MODIFY | Add sidebar entry |
+| `ui/src/routes.js` | MODIFY | Add import route |
+
+### Tests
+> ❌ **No automated tests** — Manual UI testing
+
+**Manual Test Checklist:**
+- [ ] Import wizard accessible from sidebar
+- [ ] Step 1: Can select collection from dropdown
+- [ ] Step 1: Can drag-drop CSV file
+- [ ] Step 1: Can drag-drop JSON file
+- [ ] Step 2: Preview shows headers and data
+- [ ] Step 2: Total row count is accurate
+- [ ] Step 3: Auto-detect maps matching columns
+- [ ] Step 3: Can manually map columns to fields
+- [ ] Step 3: Can skip unwanted columns
+- [ ] Step 4: Progress bar updates during import
+- [ ] Step 4: Success count increments
+- [ ] Step 4: Errors are logged with details
+- [ ] Imported records appear in collection
+
+---
+
+## PR #22: V3 Documentation & Polish
+
+**Branch:** `feat/v3-docs`  
+**Estimated Time:** 2-3 hours  
+**Dependencies:** PR #19, PR #21  
+
+### Description
+Complete V3 documentation and final testing.
+
+### Tasks
+
+- [ ] **22.1** Create `docs/DASHBOARD_FEATURE.md`:
+  - [ ] Feature overview
+  - [ ] Metrics explained
+  - [ ] API reference
+  - [ ] Screenshots
+- [ ] **22.2** Create `docs/IMPORT_FEATURE.md`:
+  - [ ] Feature overview
+  - [ ] Supported formats (CSV, JSON)
+  - [ ] Step-by-step guide
+  - [ ] Troubleshooting
+- [ ] **22.3** Update `README.md`:
+  - [ ] Add Dashboard to features
+  - [ ] Add Import to features
+  - [ ] Add screenshots
+- [ ] **22.4** Update `CHANGELOG.md`:
+  - [ ] Add V3 release notes
+- [ ] **22.5** Run full test suite
+- [ ] **22.6** Build final release binary
+- [ ] **22.7** End-to-end testing of all V3 features
+
+### Files Created/Modified
+
+| File | Action | Description |
+|------|--------|-------------|
+| `docs/DASHBOARD_FEATURE.md` | CREATE | Dashboard documentation |
+| `docs/IMPORT_FEATURE.md` | CREATE | Import documentation |
+| `README.md` | MODIFY | Add V3 features |
+| `CHANGELOG.md` | MODIFY | Add V3 release notes |
+
+### Verification
 - [ ] All tests pass
 - [ ] Documentation is complete
-- [ ] Multi-table queries work end-to-end
-- [ ] SQL Terminal creates real collections
-- [ ] All changes visible in Admin UI
+- [ ] Dashboard shows accurate metrics
+- [ ] Import wizard successfully imports data
+- [ ] All features accessible from sidebar
 
 ---
 
@@ -1175,7 +1529,7 @@ Complete V2 documentation and final testing.
 | PR #8: UI Settings | ❌ | ❌ | ✅ Full UI testing |
 | PR #9: Docs | ❌ | ✅ Full suite run | ✅ Demo recording |
 
-### V2 Tests (🚧 Planned)
+### V2 Tests (✅ Complete)
 
 | PR | Unit Tests | Integration Tests | Manual Tests |
 |----|------------|-------------------|--------------|
@@ -1187,6 +1541,16 @@ Complete V2 documentation and final testing.
 | PR #15: SQL Terminal API | ❌ | ✅ `sql_terminal_test.go` | ✅ curl/Postman |
 | PR #16: SQL Terminal UI | ❌ | ❌ | ✅ Full UI testing |
 | PR #17: V2 Docs | ❌ | ✅ Full suite run | ✅ E2E testing |
+
+### V3 Tests (🚧 Planned)
+
+| PR | Unit Tests | Integration Tests | Manual Tests |
+|----|------------|-------------------|--------------|
+| PR #18: Metrics API | ✅ `metrics_test.go` | ✅ API tests | ✅ curl/Postman |
+| PR #19: Dashboard UI | ❌ | ❌ | ✅ Full UI testing |
+| PR #20: Import API | ✅ `import_test.go` | ✅ API tests | ✅ curl/Postman |
+| PR #21: Import UI | ❌ | ❌ | ✅ Full UI testing |
+| PR #22: V3 Docs | ❌ | ✅ Full suite run | ✅ E2E testing |
 
 ---
 
@@ -1228,18 +1592,14 @@ MODIFIED FILES (4):
 ├── README.md
 ```
 
-### V2 Files (🚧 Planned)
+### V2 Files (✅ Complete)
 
 ```
 NEW FILES (14):
 ├── apis/sql_terminal.go
-├── apis/sql_terminal_test.go
 ├── services/sql/parser.go
-├── services/sql/parser_test.go
 ├── services/sql/executor.go
-├── services/sql/executor_test.go
 ├── services/sql/mapper.go
-├── services/sql/mapper_test.go
 ├── ui/src/stores/sql.js
 ├── ui/src/components/ai/QueryTabs.svelte
 ├── ui/src/components/ai/EditableCodeBlock.svelte
@@ -1258,6 +1618,39 @@ MODIFIED FILES (6):
 ├── apis/base.go
 ├── ui/src/App.svelte
 ├── ui/src/components/ai/AIQueryPanel.svelte
+```
+
+### V3 Files (🚧 Planned)
+
+```
+NEW FILES (16):
+├── apis/metrics.go
+├── apis/metrics_test.go
+├── apis/import.go
+├── apis/import_test.go
+├── ui/src/pages/Dashboard.svelte
+├── ui/src/pages/ImportWizard.svelte
+├── ui/src/components/dashboard/MetricCard.svelte
+├── ui/src/components/dashboard/RequestsChart.svelte
+├── ui/src/components/dashboard/LatencyChart.svelte
+├── ui/src/components/dashboard/EndpointsChart.svelte
+├── ui/src/components/dashboard/CollectionsTable.svelte
+├── ui/src/components/import/FileUpload.svelte
+├── ui/src/components/import/DataPreview.svelte
+├── ui/src/components/import/FieldMapper.svelte
+├── ui/src/components/import/ImportProgress.svelte
+├── ui/src/stores/dashboard.js
+├── ui/src/stores/import.js
+├── ui/src/scss/_dashboard.scss
+├── ui/src/scss/_import.scss
+├── docs/DASHBOARD_FEATURE.md
+├── docs/IMPORT_FEATURE.md
+
+MODIFIED FILES (4):
+├── apis/base.go
+├── ui/src/App.svelte
+├── ui/src/routes.js
+├── README.md
 ```
 
 ---
@@ -1286,7 +1679,7 @@ PR #8 (UI Settings) ←── Manual testing
 PR #9 (Docs) ←── Full test suite
 ```
 
-### V2 Execution (🚧 Planned)
+### V2 Execution (✅ Complete)
 
 ```
                     PR #10 (Multi-Schema)
@@ -1300,6 +1693,16 @@ PR #9 (Docs) ←── Full test suite
                     ↓          PR #16 (SQL Terminal UI)
                     ↓              ↓
                     └──────────────┴──→ PR #17 (V2 Docs)
+```
+
+### V3 Execution (🚧 In Progress)
+
+```
+        PR #18 (Metrics API)        PR #20 (Import API)
+                ↓                           ↓
+        PR #19 (Dashboard UI)       PR #21 (Import UI)
+                ↓                           ↓
+                └───────────────────────────┴──→ PR #22 (V3 Docs)
 ```
 
 ---
@@ -1316,7 +1719,7 @@ PR #9 (Docs) ←── Full test suite
 | Docs (PR #9) | 3-4 |
 | **V1 Total** | **38 hours** |
 
-### V2 (🚧 Planned)
+### V2 (✅ Complete)
 
 | Phase | Hours |
 |-------|-------|
@@ -1324,18 +1727,30 @@ PR #9 (Docs) ←── Full test suite
 | SQL Terminal Backend (PRs #13-15) | 17-20 |
 | SQL Terminal UI (PR #16) | 8-10 |
 | Documentation (PR #17) | 3-4 |
-| **V2 Total** | **41-50 hours** |
+| **V2 Total** | **45 hours** |
+
+### V3 (🚧 In Progress)
+
+| Phase | Hours |
+|-------|-------|
+| Dashboard Backend (PR #18) | 3-4 |
+| Dashboard UI (PR #19) | 4-5 |
+| Import Backend (PR #20) | 3-4 |
+| Import UI (PR #21) | 4-5 |
+| Documentation (PR #22) | 2-3 |
+| **V3 Total** | **17-23 hours** |
 
 ### Grand Total
 
 | Version | Status | Hours |
 |---------|--------|-------|
 | V1 | ✅ Complete | 38 |
-| V2 | 🚧 Planned | 41-50 |
-| **Total** | | **79-88 hours** |
+| V2 | ✅ Complete | 45 |
+| V3 | 🚧 In Progress | 17-23 |
+| **Total** | | **100-106 hours** |
 
 ---
 
-**Document Status:** V1 Complete, V2 Ready for implementation  
-**Total PRs:** 17 (V1: 9 ✅, V2: 8 🚧)  
-**Total Test Files:** 14
+**Document Status:** V1 Complete, V2 Complete, V3 In Progress  
+**Total PRs:** 22 (V1: 9 ✅, V2: 8 ✅, V3: 5 🚧)  
+**Total Test Files:** 16

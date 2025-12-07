@@ -17,26 +17,35 @@
 - convenient **Admin dashboard UI**
 - and simple **REST-ish API**
 
-## 🤖 AI Query Assistant
+## 🤖 AI Query Assistant & Developer Tools
 
-**This fork includes an AI-powered natural language query assistant** that enables users to query database collections using plain English instead of learning PocketBase's filter syntax.
+**This fork includes AI-powered features and developer tools** that extend PocketBase with natural language queries, SQL terminal, real-time dashboard, and data import capabilities.
 
-### Features
+### V3 Features (Latest)
 
-- **Natural Language Queries** - Ask questions in plain English like "show me all pending orders from last week"
-- **Schema-Aware** - Automatically understands your collection's field names and types
-- **Multiple LLM Providers** - Support for OpenAI, Ollama (local), Anthropic, and custom providers
-- **Admin UI Integration** - Built-in sidebar panel in the PocketBase Admin dashboard
-- **REST API** - Programmatic access via `/api/ai/query` endpoint
-- **Security First** - Respects existing collection API rules and authentication
+- **📊 Metrics Dashboard** - Real-time monitoring with request volume, latency percentiles (p50/p95/p99), error rates, and collection statistics
+- **📥 Data Import Wizard** - 4-step wizard to import CSV/JSON files with field mapping and progress tracking
+- See [docs/DASHBOARD_FEATURE.md](docs/DASHBOARD_FEATURE.md) and [docs/IMPORT_FEATURE.md](docs/IMPORT_FEATURE.md)
+
+### V2 Features
+
+- **🖥️ SQL Terminal** - Full SQL interface with AI-powered query generation, schema browser, and CSV/JSON export
+- **🔄 Dual Output Mode** - Get both PocketBase filter AND SQL for any natural language query
+- See [docs/SQL_TERMINAL_FEATURE.md](docs/SQL_TERMINAL_FEATURE.md)
+
+### V1 Features
+
+- **💬 Natural Language Queries** - Ask questions in plain English like "show me all pending orders from last week"
+- **🧠 Schema-Aware** - Automatically understands your collection's field names and types
+- **🔌 Multiple LLM Providers** - Support for OpenAI, Ollama (local), Anthropic, and custom providers
+- **🔒 Security First** - Respects existing collection API rules and authentication
+- See [docs/AI_QUERY_FEATURE.md](docs/AI_QUERY_FEATURE.md)
 
 ### Quick Start
 
 1. **Enable AI Query** in Settings → AI Query
 2. **Configure your LLM provider** (OpenAI, Ollama, Anthropic, or custom)
-3. **Start querying** using natural language in the Admin UI or via API
-
-For detailed documentation, setup instructions, and API reference, see [docs/AI_QUERY_FEATURE.md](docs/AI_QUERY_FEATURE.md).
+3. **Access features from the sidebar**: AI Query, SQL Terminal, Dashboard, Import
 
 **For documentation and examples, please visit https://pocketbase.io/docs.**
 

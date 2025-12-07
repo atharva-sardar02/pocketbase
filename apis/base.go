@@ -48,6 +48,8 @@ func NewRouter(app core.App) (*router.Router[*core.RequestEvent], error) {
 	bindHealthApi(app, apiGroup)
 	bindAIQueryApi(app, apiGroup)
 	bindSQLTerminalApi(app, apiGroup)
+	bindMetricsApi(app, apiGroup)
+	bindImportApi(app, apiGroup)
 
 	return pbRouter, nil
 }

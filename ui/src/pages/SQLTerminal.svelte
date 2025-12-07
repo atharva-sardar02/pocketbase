@@ -180,6 +180,9 @@
         sqlRowsAffected.set(0);
         sqlIsMulti.set(false);
         sqlMultiResults.set([]);
+        sqlTotalStatements.set(0);
+        sqlSuccessfulCount.set(0);
+        sqlFailedCount.set(0);
 
         try {
             const baseUrl = ApiClient.baseURL.endsWith("/")
@@ -213,7 +216,26 @@
 
             // Handle results if executed (AI endpoint nests results in 'result')
             const result = data.result || data;
-            if (result.rows && result.rows.length > 0) {
+            
+            // Handle multi-statement response
+            if (result.isMulti) {
+                sqlIsMulti.set(true);
+                sqlTotalStatements.set(result.totalStatements || 0);
+                sqlSuccessfulCount.set(result.successfulCount || 0);
+                sqlFailedCount.set(result.failedCount || 0);
+                sqlMultiResults.set(result.results || []);
+                sqlSuccess.set(result.message || `${result.totalStatements} statements executed`);
+                
+                // If there are top-level rows (from last SELECT), display them
+                if (result.rows && result.rows.length > 0) {
+                    sqlResults.set(result.rows);
+                    sqlColumns.set(result.columns || Object.keys(result.rows[0] || {}));
+                    sqlTotalRows.set(result.totalRows || result.rows.length);
+                }
+                if (result.rowsAffected !== undefined) {
+                    sqlRowsAffected.set(result.rowsAffected);
+                }
+            } else if (result.rows && result.rows.length > 0) {
                 sqlResults.set(result.rows);
                 sqlColumns.set(result.columns || Object.keys(result.rows[0] || {}));
                 sqlTotalRows.set(result.totalRows || result.rows.length);
@@ -229,6 +251,16 @@
             addToHistory($sqlAIQuery, "ai");
             if (data.sql) {
                 addToHistory(data.sql, "sql");
+            }
+            
+            // Refresh schema if it was a DDL operation
+            const upper = (data.sql || "").toUpperCase().trim();
+            if (
+                upper.includes("CREATE") ||
+                upper.includes("ALTER") ||
+                upper.includes("DROP")
+            ) {
+                loadSchema();
             }
         } catch (err) {
             sqlError.set(err.message || "Failed to execute AI query");

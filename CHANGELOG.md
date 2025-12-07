@@ -1,3 +1,39 @@
+## AI Query Feature V3 (Fork Addition)
+
+### V3: Metrics Dashboard & Data Import Wizard
+
+- Added **Metrics Dashboard** - Real-time monitoring for PocketBase
+  - Overview metrics: total requests, average latency, error rate, database size
+  - Requests chart: time-series visualization of request volume
+  - Latency chart: p50/p95/p99 percentile tracking
+  - Top endpoints: horizontal bar chart of most-accessed API endpoints
+  - Collection statistics: record counts per collection
+  - Configurable time periods: 1h, 6h, 24h, 7d
+  - Auto-refresh every 30 seconds (configurable)
+  - REST API endpoints:
+    - `GET /api/metrics/overview` - Overview statistics
+    - `GET /api/metrics/requests` - Requests time-series
+    - `GET /api/metrics/latency` - Latency percentiles
+    - `GET /api/metrics/errors` - Error counts by status
+    - `GET /api/metrics/endpoints` - Top endpoints by request count
+    - `GET /api/metrics/collections` - Collection record counts
+  - See [docs/DASHBOARD_FEATURE.md](docs/DASHBOARD_FEATURE.md) for full documentation
+
+- Added **Data Import Wizard** - Bulk data import for collections
+  - 4-step wizard: Select → Preview → Map → Import
+  - Multi-format support: CSV and JSON files
+  - Drag-and-drop file upload
+  - Data preview with sample rows
+  - Field mapping with auto-detection
+  - Real-time import progress tracking
+  - Detailed error reporting per row
+  - CSV delimiter options (comma, tab, semicolon)
+  - REST API endpoints:
+    - `POST /api/import/preview` - Parse file and return headers/sample
+    - `POST /api/import/validate` - Validate mapping against schema
+    - `POST /api/import/execute` - Perform bulk import
+  - See [docs/IMPORT_FEATURE.md](docs/IMPORT_FEATURE.md) for full documentation
+
 ## AI Query Feature V2 (Fork Addition)
 
 ### V2: SQL Terminal & Dual Output Mode

@@ -124,6 +124,26 @@
                     <i class="ri-terminal-box-line" />
                 </a>
                 <a
+                    href="/dashboard"
+                    class="menu-item"
+                    aria-label="Dashboard"
+                    use:link
+                    use:active={{ path: "/dashboard/?.*", className: "current-route" }}
+                    use:tooltip={{ text: "Dashboard", position: "right" }}
+                >
+                    <i class="ri-dashboard-line" />
+                </a>
+                <a
+                    href="/import"
+                    class="menu-item"
+                    aria-label="Import Data"
+                    use:link
+                    use:active={{ path: "/import/?.*", className: "current-route" }}
+                    use:tooltip={{ text: "Import Data", position: "right" }}
+                >
+                    <i class="ri-upload-cloud-2-line" />
+                </a>
+                <a
                     href="/logs"
                     class="menu-item"
                     aria-label="Logs"

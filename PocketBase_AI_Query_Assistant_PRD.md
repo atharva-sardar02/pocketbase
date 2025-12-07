@@ -1,9 +1,9 @@
 # Product Requirements Document
 ## PocketBase AI Query Assistant
 
-**Version:** 2.0  
+**Version:** 3.0  
 **Date:** December 2025  
-**Status:** V1 Complete, V2 In Planning
+**Status:** V1 Complete, V2 Complete, V3 In Progress
 
 ---
 
@@ -12,7 +12,8 @@
 | Version | Date | Status | Description |
 |---------|------|--------|-------------|
 | 1.0 | Dec 2025 | ✅ Complete | Single-collection AI Query with filter generation |
-| 2.0 | Dec 2025 | 🚧 Planning | Multi-table queries, SQL Terminal, dual output |
+| 2.0 | Dec 2025 | ✅ Complete | Multi-table queries, SQL Terminal, dual output |
+| 3.0 | Dec 2025 | 🚧 In Progress | Real-time Metrics Dashboard, Data Import Wizard |
 
 ---
 
@@ -72,6 +73,19 @@ This is a **brownfield development project**. We will fork the PocketBase open-s
 | 15 | As a developer, I want to create collections using SQL syntax (CREATE TABLE), so I can use familiar database commands. |
 | 16 | As a developer, I want INSERT/UPDATE/DELETE operations in SQL Terminal to create real PocketBase records, so changes appear in Admin UI. |
 | 17 | As a user, I want AI assistance in SQL Terminal, so I can describe what I want in plain English and get SQL generated. |
+
+### 2.5 V3 User Stories — Dashboard & Data Import
+
+| # | User Story |
+|---|------------|
+| 18 | As an admin, I want a real-time dashboard showing requests/second, latency, and error rates, so I can monitor system health at a glance. |
+| 19 | As an admin, I want to see response time percentiles (p50, p95, p99), so I can identify performance issues. |
+| 20 | As an admin, I want to see which API endpoints are most used, so I can optimize hot paths. |
+| 21 | As an admin, I want to see record counts per collection, so I can understand data distribution. |
+| 22 | As a user, I want to import data from CSV files into a collection, so I can bulk load existing data. |
+| 23 | As a user, I want to import data from JSON files into a collection, so I can migrate data from other systems. |
+| 24 | As a user, I want to preview and map CSV columns to collection fields before importing, so I can ensure correct data mapping. |
+| 25 | As a user, I want to see import progress and error details, so I can fix issues and retry failed records. |
 
 ---
 
@@ -474,7 +488,157 @@ A complete database management tool built into PocketBase Admin UI.
 
 ---
 
-## 6. Technical Pitfalls & Considerations
+## 7. Version 3.0 Features
+
+### 7.1 Real-time Metrics Dashboard
+
+A visual monitoring dashboard providing system health insights beyond the existing logs feature.
+
+**Key Differences from Existing Logs:**
+
+| Aspect | Current Logs | New Dashboard |
+|--------|--------------|---------------|
+| **Display** | Text-based table of log entries | Visual graphs, charts, gauges |
+| **Focus** | Individual requests/events | Aggregated metrics & trends |
+| **Data** | Request path, status, IP, timestamp | Requests/min, avg latency, error rate, percentiles |
+| **Use Case** | Debugging specific issues | Performance monitoring, capacity planning |
+
+**Dashboard Layout:**
+```
++--------------------------------------------------+
+| [Overview Cards - 4 metrics]                      |
+| Requests/24h | Avg Latency | Error Rate | DB Size |
++--------------------------------------------------+
+| [Requests Over Time]     | [Latency Distribution] |
+| Line chart (24h)         | Line chart (p50/p95)   |
++--------------------------------------------------+
+| [Top Endpoints]          | [Collections]          |
+| Bar chart                | Table with counts      |
++--------------------------------------------------+
+```
+
+**Metrics Provided:**
+
+| Metric | Description | Visualization |
+|--------|-------------|---------------|
+| Total Requests | Request count over time | Line chart |
+| Avg Latency | Average response time in ms | Metric card + line chart |
+| Error Rate | Percentage of 4xx/5xx responses | Metric card + line chart |
+| P50/P95/P99 Latency | Response time percentiles | Multi-line chart |
+| Top Endpoints | Most requested API paths | Horizontal bar chart |
+| Status Code Distribution | Breakdown of 200/400/500 | Donut chart |
+| Collection Stats | Record counts per collection | Table |
+| Database Size | Total SQLite database size | Gauge |
+
+**API Endpoints:**
+
+| Endpoint | Returns |
+|----------|---------|
+| `GET /api/metrics/overview` | Request count, avg latency, error rate, DB size |
+| `GET /api/metrics/requests` | Time-series of requests per minute (last 24h) |
+| `GET /api/metrics/latency` | Avg/p50/p95/p99 latency over time |
+| `GET /api/metrics/errors` | Error count by status code over time |
+| `GET /api/metrics/endpoints` | Top 10 endpoints by request count |
+| `GET /api/metrics/collections` | Record counts per collection |
+
+### 7.2 Data Import Wizard
+
+A multi-step wizard for bulk importing CSV/JSON data into PocketBase collections.
+
+**Import Flow:**
+```
+Step 1: Select Collection & Upload File
++----------------------------------+
+| [Collection Dropdown]            |
+| [File Drop Zone]                 |
+| Supports: CSV, JSON              |
++----------------------------------+
+
+Step 2: Preview Data
++----------------------------------+
+| File: data.csv (1,234 rows)      |
+| [Preview Table - first 5 rows]   |
++----------------------------------+
+
+Step 3: Map Fields
++----------------------------------+
+| CSV Column    →  Collection Field|
+| --------------|------------------|
+| [name]        →  [name ▼]        |
+| [email]       →  [email ▼]       |
+| [age]         →  [-- skip -- ▼]  |
+| Auto-detect button               |
++----------------------------------+
+
+Step 4: Import
++----------------------------------+
+| [Progress Bar: 45%]              |
+| Imported: 556 / 1,234            |
+| Errors: 3                        |
+| [View Error Log]                 |
++----------------------------------+
+```
+
+**Supported Formats:**
+
+| Format | Detection | Structure |
+|--------|-----------|-----------|
+| CSV | `.csv` extension, comma/tab delimited | First row = headers |
+| JSON | `.json` extension | Array of objects `[{...}, {...}]` |
+
+**API Endpoints:**
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /api/import/preview` | Parse file, return headers + sample rows |
+| `POST /api/import/validate` | Validate mapping against collection schema |
+| `POST /api/import/execute` | Perform bulk import with progress |
+
+**Field Mapping Features:**
+
+- Auto-detect: Match CSV headers to field names automatically
+- Manual mapping: Dropdown to select target field
+- Skip option: Ignore columns not needed
+- Type validation: Warn if data doesn't match field type
+- Required field check: Error if required fields not mapped
+
+### 7.3 V3 File Structure
+
+```
+pocketbase/
+├── apis/
+│   ├── metrics.go              # NEW: Dashboard API endpoints
+│   └── import.go               # NEW: Import wizard API endpoints
+├── ui/src/
+│   ├── pages/
+│   │   ├── Dashboard.svelte    # NEW: Main dashboard page
+│   │   └── ImportWizard.svelte # NEW: Import wizard page
+│   ├── components/
+│   │   ├── dashboard/
+│   │   │   ├── MetricCard.svelte
+│   │   │   ├── RequestsChart.svelte
+│   │   │   ├── LatencyChart.svelte
+│   │   │   ├── EndpointsChart.svelte
+│   │   │   └── CollectionsTable.svelte
+│   │   └── import/
+│   │       ├── FileUpload.svelte
+│   │       ├── DataPreview.svelte
+│   │       ├── FieldMapper.svelte
+│   │       └── ImportProgress.svelte
+│   ├── stores/
+│   │   ├── dashboard.js        # NEW: Dashboard state
+│   │   └── import.js           # NEW: Import wizard state
+│   └── scss/
+│       ├── _dashboard.scss     # NEW: Dashboard styles
+│       └── _import.scss        # NEW: Import styles
+└── docs/
+    ├── DASHBOARD_FEATURE.md    # NEW: Dashboard documentation
+    └── IMPORT_FEATURE.md       # NEW: Import documentation
+```
+
+---
+
+## 8. Technical Pitfalls & Considerations
 
 ### 6.1 Go Backend Challenges
 
@@ -533,20 +697,43 @@ A complete database management tool built into PocketBase Admin UI.
 - [x] Security: API respects collection rules, doesn't expose unauthorized data
 - [x] Documentation complete: README, architecture overview, setup instructions
 
-### V2 Success Criteria (🚧 In Progress)
+### V2 Success Criteria (✅ Complete)
 
-- [ ] Multi-table queries work with JOINs across related collections
-- [ ] Dual output shows both Filter and SQL in switchable tabs
-- [ ] Users can edit generated queries before executing
-- [ ] SQL Terminal page accessible from sidebar
-- [ ] SQL Terminal supports AI Mode (natural language → SQL)
-- [ ] SQL Terminal supports SQL Mode (direct SQL execution)
-- [ ] CREATE TABLE creates real PocketBase collections
-- [ ] INSERT/UPDATE/DELETE operations create/modify real records
-- [ ] Schema browser shows all collections in SQL Terminal
-- [ ] Query history saved and accessible
-- [ ] Export results to CSV/JSON
-- [ ] Changes immediately visible in Admin UI
+- [x] Multi-table queries work with JOINs across related collections
+- [x] Dual output shows both Filter and SQL in switchable tabs
+- [x] Users can edit generated queries before executing
+- [x] SQL Terminal page accessible from sidebar
+- [x] SQL Terminal supports AI Mode (natural language → SQL)
+- [x] SQL Terminal supports SQL Mode (direct SQL execution)
+- [x] CREATE TABLE creates real PocketBase collections
+- [x] INSERT/UPDATE/DELETE operations create/modify real records
+- [x] Schema browser shows all collections in SQL Terminal
+- [x] Query history saved and accessible
+- [x] Export results to CSV/JSON
+- [x] Changes immediately visible in Admin UI
+
+### V3 Success Criteria (🚧 In Progress)
+
+**Dashboard:**
+- [ ] Dashboard page accessible from sidebar with chart icon
+- [ ] Overview cards show: total requests, avg latency, error rate, DB size
+- [ ] Requests over time chart displays real-time data (auto-refresh)
+- [ ] Latency chart shows p50/p95/p99 percentiles
+- [ ] Top endpoints bar chart shows most requested paths
+- [ ] Collections table shows record counts per collection
+- [ ] All metrics derived from existing `_logs` table data
+- [ ] Auto-refresh every 30 seconds (configurable)
+
+**Data Import:**
+- [ ] Import wizard accessible from sidebar or collection view
+- [ ] CSV file upload with drag-drop support
+- [ ] JSON file upload with drag-drop support
+- [ ] Preview shows first 5 rows of imported data
+- [ ] Field mapping UI allows manual column-to-field assignment
+- [ ] Auto-detect maps matching column names automatically
+- [ ] Progress bar shows import status
+- [ ] Error log displays failed records with reasons
+- [ ] Successfully imported records appear in collection immediately
 
 ---
 
@@ -561,19 +748,29 @@ A complete database management tool built into PocketBase Admin UI.
 | Day 5-6 | Frontend (AI Query, Settings) | ✅ Complete |
 | Day 7 | Testing & Documentation | ✅ Complete |
 
-### V2 Timeline (Estimated 41-50 hours)
+### V2 Timeline (✅ Complete — 45 hours)
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| **Phase 1** | Multi-Collection Schema (PR #10) | ✅ Complete |
+| **Phase 2** | Dual Output Backend (PR #11) | ✅ Complete |
+| **Phase 3** | Editable Query UI (PR #12) | ✅ Complete |
+| **Phase 4** | SQL Parser & Mapper (PR #13) | ✅ Complete |
+| **Phase 5** | SQL Executor (PR #14) | ✅ Complete |
+| **Phase 6** | SQL Terminal API (PR #15) | ✅ Complete |
+| **Phase 7** | SQL Terminal UI (PR #16) | ✅ Complete |
+| **Phase 8** | Documentation (PR #17) | ✅ Complete |
+
+### V3 Timeline (Estimated 17-23 hours)
 
 | Phase | Focus | Est. Hours |
 |-------|-------|------------|
-| **Phase 1** | Multi-Collection Schema (PR #10) | 4-5 |
-| **Phase 2** | Dual Output Backend (PR #11) | 5-6 |
-| **Phase 3** | Editable Query UI (PR #12) | 4-5 |
-| **Phase 4** | SQL Parser & Mapper (PR #13) | 6-7 |
-| **Phase 5** | SQL Executor (PR #14) | 6-7 |
-| **Phase 6** | SQL Terminal API (PR #15) | 5-6 |
-| **Phase 7** | SQL Terminal UI (PR #16) | 8-10 |
-| **Phase 8** | Documentation (PR #17) | 3-4 |
-| **Total** | | **41-50 hours** |
+| **Phase 1** | Metrics Backend API (PR #18) | 3-4 |
+| **Phase 2** | Dashboard UI (PR #19) | 4-5 |
+| **Phase 3** | Import Backend API (PR #20) | 3-4 |
+| **Phase 4** | Import Wizard UI (PR #21) | 4-5 |
+| **Phase 5** | Documentation & Polish (PR #22) | 2-3 |
+| **Total** | | **17-23 hours** |
 
 ---
 
